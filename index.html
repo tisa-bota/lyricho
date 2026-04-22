@@ -1261,7 +1261,13 @@ function renderLines(){
       chips.className='sec-presets'+(!line.text?' show':'');chips.id='chips-'+line.id;
       SECTION_PRESETS.forEach(p=>{
         const c=document.createElement('button');c.className='sec-chip';c.textContent=p;
-        c.onclick=()=>{line.text=p;saveSongs();renderLines();setTimeout(()=>{const el=document.getElementById('li-'+line.id);if(el)el.focus();},20);};
+        c.onclick=()=>{
+          line.text=p;saveSongs();
+          // チップ選択後はrenderLines()せず、DOMを直接パッチ（スクロール維持）
+          const inp=document.getElementById('li-'+line.id);
+          if(inp){inp.value=p;autoResize(inp);inp.focus();}
+          chips.classList.remove('show');
+        };
         chips.appendChild(c);
       });
       area.appendChild(chips);
@@ -1315,7 +1321,12 @@ function renderLines(){
     };
     if(line.type==='chord')inp.onfocus=()=>{focusedChordId=line.id;};
     const del=document.createElement('button');del.className='del-btn';del.textContent='✕';
-    del.onclick=()=>{song.lines=song.lines.filter(l=>l.id!==line.id);saveSongs();renderLines();};
+    del.onclick=()=>{
+      const _area=document.getElementById('linesArea');
+      const _scroll=_area?_area.scrollTop:0;
+      song.lines=song.lines.filter(l=>l.id!==line.id);saveSongs();renderLines();
+      if(_area)_area.scrollTop=_scroll;
+    };
     row.appendChild(tag);row.appendChild(inp);row.appendChild(del);
     area.appendChild(row);
     autoResize(inp);
@@ -1329,7 +1340,11 @@ function insertLineAt(idx,type){
   const song=currentSong();if(!song)return;
   const line={id:uid(),type,text:''};
   song.lines.splice(idx,0,line);
+  // スクロール位置を保存してから再描画
+  const area=document.getElementById('linesArea');
+  const savedScroll=area?area.scrollTop:0;
   saveSongs();renderLines();
+  if(area)area.scrollTop=savedScroll;
   setTimeout(()=>{
     const el=document.getElementById('li-'+line.id);
     if(el){el.focus();if(type==='chord')focusedChordId=line.id;}
