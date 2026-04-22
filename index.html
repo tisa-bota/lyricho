@@ -150,13 +150,13 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
 .type-lyric .type-tag{background:#1a1e2a;color:#7a9fd4}
 .type-section .type-tag{background:var(--hi-green);color:var(--green)}
 .type-section{margin-top:8px}
-.type-section .line-inp{font-weight:900;font-size:0.82rem;color:var(--green);letter-spacing:.12em;text-transform:uppercase;border-left:none!important;border-right:none!important;border-top:none!important;border-bottom:1px solid #2e2608!important;border-radius:0!important;padding-left:2px!important;background:transparent!important}
+.type-section .line-inp{font-weight:900;font-size:calc(0.82rem * var(--ui-scale));color:var(--green);letter-spacing:.12em;text-transform:uppercase;border-left:none!important;border-right:none!important;border-top:none!important;border-bottom:1px solid #2e2608!important;border-radius:0!important;padding-left:2px!important;background:transparent!important}
 .sec-presets{display:none;gap:5px;flex-wrap:wrap;padding:4px 0 3px;margin-left:36px}
 .sec-presets.show{display:flex}
 .sec-chip{background:var(--hi-green);border:1px solid #2e2608;color:var(--green);font-size:0.71rem;font-weight:700;padding:4px 10px;border-radius:12px;cursor:pointer;font-family:inherit;letter-spacing:.05em;transition:all .15s}
 .sec-chip:hover,.sec-chip:active{background:#2e2608}
-.line-inp{flex:1;background:transparent;border:1px solid transparent;color:var(--text);font-family:inherit;font-size:0.91rem;padding:6px 7px;border-radius:5px;outline:none;resize:none;min-height:34px;line-height:1.6;transition:border .15s}
-.type-chord .line-inp{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--blue);font-size:0.94rem}
+.line-inp{flex:1;background:transparent;border:1px solid transparent;color:var(--text);font-family:inherit;font-size:calc(0.91rem * var(--ui-scale));padding:6px 7px;border-radius:5px;outline:none;resize:none;min-height:34px;line-height:1.6;transition:border .15s}
+.type-chord .line-inp{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--blue);font-size:calc(0.94rem * var(--ui-scale))}
 .line-inp:focus{border-color:var(--border)!important;background:var(--surface2)!important}
 .del-btn{color:var(--muted);background:none;border:none;cursor:pointer;font-size:1rem;padding:5px 3px;margin-top:3px;flex-shrink:0;transition:color .15s;opacity:0}
 .line-row:hover .del-btn{opacity:1}
