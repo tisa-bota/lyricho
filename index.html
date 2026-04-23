@@ -123,7 +123,7 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
 .ui-size-btn{background:none;border:1px solid transparent;color:var(--muted);font-family:inherit;font-size:0.72rem;font-weight:700;padding:2px 7px;border-radius:5px;cursor:pointer;transition:all .15s}
 .ui-size-btn.active{background:var(--hi-blue);border-color:var(--blue);color:var(--blue)}
 .ui-size-btn:hover:not(.active){color:var(--text);border-color:var(--border)}
-@media(max-width:640px){.ui-size-btns{display:none}}
+@media(max-width:1024px){.ui-size-btns{display:none}}
 .hbtn.pdf:hover{border-color:var(--amber)}
 
 /* LINES */
@@ -331,6 +331,7 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 
 /* MOBILE */
+/* ── MOBILE (スマホ: ~640px) ── */
 @media(max-width:640px){
   .hdr-back{display:block}
   .hdr-icon{display:none}
@@ -354,9 +355,57 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
   .song-item{padding:14px 14px}
   .insert-bar{opacity:1}
 }
-@media(min-width:641px){
+
+/* ── TABLET / iPad (641px〜1024px) ── */
+@media(min-width:641px) and (max-width:1024px){
+  /* ヘッダー：戻るボタン＋Aボタンを表示 */
+  .hdr-back{display:block}
+  .hdr-icon{display:none}
+  .hdr-btn-m{display:flex;align-items:center}
+  body.vlist .hdr-back{display:none}
+  body.vlist .hdr-btn-m{display:flex}
+  body.vedit .hdr-btn-m{display:none}
+  body.vedit .hdr-back{display:block}
+  /* デスクトップ用文字サイズボタンは非表示（Aボタンで代替） */
+  .ui-size-btns{display:none}
+
+  /* スライド切り替えレイアウト */
+  .app{position:relative}
+  .sidebar{position:absolute;inset:0;width:340px;min-width:unset;transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:10;box-shadow:4px 0 24px rgba(0,0,0,.4)}
+  .editor-area{position:absolute;inset:0;transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:5}
+  body.vlist .sidebar{transform:translateX(0)}
+  body.vlist .editor-area{transform:translateX(0)}
+  body.vedit .sidebar{transform:translateX(-340px)}
+  body.vedit .editor-area{transform:translateX(0)}
+
+  /* サイドバー表示中のエディタはオーバーレイで少し暗く（タップで閉じられる） */
+  body.vlist .editor-area::after{
+    content:'';position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:6;
+    cursor:pointer;
+    animation:fadeInOverlay .3s ease forwards
+  }
+  @keyframes fadeInOverlay{from{opacity:0}to{opacity:1}}
+
+  /* タッチ操作しやすいサイズ調整 */
+  .panel-footer .new-btn{display:block}
+  .item-del,.del-btn,.set-row-del{opacity:1!important}
+  .bottom-bar{padding-bottom:var(--safe-b)}
+  .chord-btn{min-width:42px;padding:8px 10px;font-size:0.82rem}
+  .add-btn{font-size:0.78rem;padding:8px 10px}
+  .song-item{padding:14px 16px}
+  .insert-bar{opacity:1}
+  /* コードパネル少し広めに */
+  .chord-root-row{gap:6px}
+  .chord-qual-row{gap:6px}
+  /* タイプタグをタップしやすく */
+  .type-tag{padding:4px 7px;font-size:0.62rem}
+}
+
+/* ── DESKTOP (1025px〜) ── */
+@media(min-width:1025px){
   .hdr-btn-m{display:none!important}
   .hdr-back{display:none!important}
+  .hdr-font-m{display:none!important}
 }
 
 /* ── PRINT / PDF styles ── */
@@ -661,7 +710,10 @@ function esc(s) {return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replac
 function currentSong(){return songs.find(s=>s.id===currentSongId);}
 function currentSet() {return setlists.find(s=>s.id===currentSetId);}
 
-// ══ MOBILE ══
+// ══ MOBILE / TABLET ══
+// スライド切り替えを使う画面幅（スマホ＋iPad）
+function isSlideView(){return window.innerWidth<=1024;}
+// 後方互換のために残す
 function isMobile(){return window.innerWidth<=640;}
 function showList(){
   document.body.className='vlist';
@@ -670,7 +722,7 @@ function showList(){
   document.getElementById('hdrNewBtn').style.background=currentView==='songs'?'var(--red)':'var(--amber)';
 }
 function showEditor(){
-  if(!isMobile()) return;
+  if(!isSlideView()) return;
   document.body.className='vedit';
   if(currentView==='songs'){const s=currentSong();document.getElementById('hdrTitle').textContent=s?.title||'（無題）';}
   else{const s=currentSet();document.getElementById('hdrTitle').textContent=(s?.emoji||'')+' '+(s?.title||'（無題）');}
@@ -1070,7 +1122,7 @@ function deleteSong(id,e){
 function saveTitle(){
   const s=currentSong();if(!s)return;
   s.title=document.getElementById('titleInp').value;saveSongs();renderSongList();
-  if(isMobile())document.getElementById('hdrTitle').textContent=s.title||'（無題）';
+  if(isSlideView())document.getElementById('hdrTitle').textContent=s.title||'（無題）';
 }
 function toggleSort(){
   sorted=!sorted;
@@ -1112,7 +1164,7 @@ function deleteSet(id,e){
 function saveSetTitle(){
   const s=currentSet();if(!s)return;
   s.title=document.getElementById('setTitleInp').value;saveSets();renderSetList();
-  if(isMobile())document.getElementById('hdrTitle').textContent=(s.emoji||'')+' '+(s.title||'（無題）');
+  if(isSlideView())document.getElementById('hdrTitle').textContent=(s.emoji||'')+' '+(s.title||'（無題）');
 }
 function renderSetList(){
   const el=document.getElementById('setList');
@@ -1374,6 +1426,35 @@ buildChordGrid();
 renderSongList();
 renderSetList();
 renderEditor();
+
+// ── iPad: vlist状態でエディタエリアをタップしたらサイドバーを閉じる ──
+(function initTabletOverlayTap(){
+  const editorArea = document.querySelector('.editor-area');
+  if(!editorArea) return;
+  editorArea.addEventListener('click', function(e){
+    // iPadのスライドビューで、サイドバー表示中（vlist）のとき
+    if(window.innerWidth > 640 && window.innerWidth <= 1024){
+      if(document.body.classList.contains('vlist') && (currentSongId || currentSetId)){
+        showEditor();
+      }
+    }
+  });
+})();
+
+// ── ウィンドウリサイズ（iPad回転など）対応 ──
+window.addEventListener('resize', ()=>{
+  // デスクトップ幅になったらスライドクラスをリセット
+  if(!isSlideView()){
+    document.body.classList.remove('vedit');
+    document.body.classList.add('vlist');
+    document.getElementById('hdrTitle').textContent = 'コード譜メモ帳';
+  } else {
+    // タブレット幅に戻ったとき、曲・セットが選択中なら vedit に
+    if(currentSongId || currentSetId){
+      showEditor();
+    }
+  }
+});
 
 // ══ UI FONT SIZE ══
 let uiSize = localStorage.getItem('crd_uisize') || 'm';
