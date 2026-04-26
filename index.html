@@ -864,7 +864,7 @@ function insertChord(ch){
     const st=el.selectionStart,en=el.selectionEnd;
     line.text=line.text.slice(0,st)+ch+' '+line.text.slice(en);
     saveSongs();renderLines();
-    setTimeout(()=>{const ne=document.getElementById('li-'+tid);if(ne){const p=st+ch.length+1;ne.setSelectionRange(p,p);ne.focus();}},10);
+    setTimeout(()=>{const ne=document.getElementById('li-'+tid);if(ne){const p=st+ch.length+1;ne.inputMode='none';ne.setSelectionRange(p,p);ne.focus();}},10);
   } else {line.text+=ch+' ';saveSongs();renderLines();}
 }
 
@@ -1390,6 +1390,7 @@ function renderLines(){
       inp.className='line-inp';
       inp.placeholder=newType==='chord'?'Am  F  C  G …':newType==='section'?'セクション名…':'歌詞を入力…';
       inp.onfocus=newType==='chord'?()=>{focusedChordId=line.id;}:null;
+      inp.inputMode=newType==='chord'?'none':'';
       autoResize(inp);
       // Show/hide section presets chip row
       const chips=document.getElementById('chips-'+line.id);
@@ -1419,7 +1420,7 @@ function renderLines(){
       line.text=this.value;autoResize(this);saveSongs();
       if(line.type==='section'){const ch=document.getElementById('chips-'+line.id);if(ch)ch.classList.toggle('show',!this.value);}
     };
-    if(line.type==='chord')inp.onfocus=()=>{focusedChordId=line.id;};
+    if(line.type==='chord'){inp.onfocus=()=>{focusedChordId=line.id;};inp.inputMode='none';}
     const del=document.createElement('button');del.className='del-btn';del.textContent='✕';
     del.onclick=()=>{
       const _area=document.getElementById('linesArea');
