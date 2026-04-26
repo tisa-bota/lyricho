@@ -354,6 +354,9 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
   .add-btn{font-size:0.74rem;padding:7px 8px}
   .song-item{padding:14px 14px}
   .insert-bar{opacity:.45}
+}
+
+/* ── TABLET / iPad (641px〜1024px) ── */
 @media(min-width:641px) and (max-width:1024px){
   /* ヘッダー：戻るボタン＋Aボタンを表示 */
   .hdr-back{display:block}
@@ -639,6 +642,20 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
   </div>
 </div>
 
+<!-- CUSTOM CONFIRM MODAL -->
+<div class="overlay" id="confirmOverlay">
+  <div class="modal" style="width:min(100%,360px)">
+    <div class="modal-ttl" id="confirmMsg" style="font-size:0.95rem;font-weight:700;border-bottom:none;margin-bottom:18px;padding-bottom:0;line-height:1.6"></div>
+    <div style="display:flex;gap:8px">
+      <button class="modal-close" id="confirmCancel" style="flex:1;margin-top:0">キャンセル</button>
+      <button class="modal-close" id="confirmOk" style="flex:1;margin-top:0;background:var(--red);color:#120a1e;border-color:var(--red)">削除する</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST NOTIFICATION -->
+<div id="toastEl" style="display:none;position:fixed;bottom:calc(24px + var(--safe-b));left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 20px;border-radius:24px;font-size:0.84rem;font-weight:700;z-index:500;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.5);pointer-events:none"></div>
+
 <!-- PLAY MODE -->
 <div class="play-overlay" id="playOverlay">
   <div class="play-header">
@@ -654,6 +671,39 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
 </div>
 
 <script>
+// ══ CUSTOM DIALOGS ══
+function customConfirm(msg, okLabel='削除する'){
+  return new Promise(resolve=>{
+    document.getElementById('confirmMsg').textContent = msg;
+    document.getElementById('confirmOk').textContent = okLabel;
+    document.getElementById('confirmOverlay').classList.add('open');
+    const ok  = document.getElementById('confirmOk');
+    const cancel = document.getElementById('confirmCancel');
+    function cleanup(result){
+      document.getElementById('confirmOverlay').classList.remove('open');
+      ok.removeEventListener('click', onOk);
+      cancel.removeEventListener('click', onCancel);
+      resolve(result);
+    }
+    function onOk()    { cleanup(true);  }
+    function onCancel(){ cleanup(false); }
+    ok.addEventListener('click', onOk);
+    cancel.addEventListener('click', onCancel);
+  });
+}
+let _toastTimer = null;
+function toast(msg, ms=1800){
+  const el = document.getElementById('toastEl');
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.style.opacity = '1';
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(()=>{
+    el.style.opacity = '0';
+    setTimeout(()=>{ el.style.display='none'; el.style.opacity='1'; }, 300);
+  }, ms);
+}
+
 // ══ STATE ══
 let songs    = JSON.parse(localStorage.getItem('crd_songs') || '[]');
 let setlists = JSON.parse(localStorage.getItem('crd_sets')  || '[]');
@@ -799,7 +849,7 @@ function toggleChordMode(){
     return;
   }
   const song=currentSong();
-  if(!song){alert('曲を選択してください');return;}
+  if(!song){toast('⚠ 曲を選択してください');return;}
   openDegreeModal();
 }
 
@@ -940,7 +990,7 @@ function transposeChordToken(token,semitones,useFlat){
 
 function openTranspose(){
   const song=currentSong();if(!song||!song.key){
-    alert('キーを先に設定してください');return;
+    toast('⚠ キーを先に設定してください');return;
   }
   document.getElementById('transposeFrom').textContent=song.key;
   document.getElementById('transposeTo').value='';
@@ -1056,7 +1106,7 @@ function setPreviewTheme(t){prevTheme=t;applyPreviewClasses();}
 function setPreviewSize(s){prevSize=s;applyPreviewClasses();}
 // ══ PDF / PRINT EXPORT ══
 function openPdfModal(){
-  const song=currentSong();if(!song){alert('曲を選択してください');return;}
+  const song=currentSong();if(!song){toast('⚠ 曲を選択してください');return;}
   pdfOpt='print';
   document.getElementById('pdfOptPrint').classList.add('selected');
   document.getElementById('pdfOptText').classList.remove('selected');
@@ -1108,8 +1158,9 @@ function newSong(){
   selectSong(s.id);setTimeout(()=>document.getElementById('titleInp').focus(),60);
 }
 function selectSong(id){currentSongId=id;currentSetId=null;renderSongList();renderEditor();showEditor();}
-function deleteSong(id,e){
-  e.stopPropagation();if(!confirm('この曲を削除しますか？'))return;
+async function deleteSong(id,e){
+  e.stopPropagation();
+  if(!await customConfirm('この曲を削除しますか？'))return;
   songs=songs.filter(s=>s.id!==id);
   setlists.forEach(sl=>{sl.songIds=sl.songIds.filter(sid=>sid!==id);});
   if(currentSongId===id){currentSongId=null;showList();}
@@ -1151,8 +1202,9 @@ function newSet(){
   selectSet(s.id);setTimeout(()=>document.getElementById('setTitleInp').focus(),60);
 }
 function selectSet(id){currentSetId=id;currentSongId=null;renderSetList();renderEditor();showEditor();}
-function deleteSet(id,e){
-  e.stopPropagation();if(!confirm('このセットリストを削除しますか？'))return;
+async function deleteSet(id,e){
+  e.stopPropagation();
+  if(!await customConfirm('このセットリストを削除しますか？'))return;
   setlists=setlists.filter(s=>s.id!==id);
   if(currentSetId===id){currentSetId=null;showList();}
   saveSets();renderSetList();renderEditor();
@@ -1253,7 +1305,7 @@ function closeEmojiPicker(){document.getElementById('emojiOverlay').classList.re
 
 // ══ PLAY MODE ══
 function openPlayMode(){
-  const sl=currentSet();if(!sl||!sl.songIds.length){alert('曲を追加してください');return;}
+  const sl=currentSet();if(!sl||!sl.songIds.length){toast('⚠ 曲を追加してください');return;}
   playIdx=0;
   document.getElementById('playSetName').textContent=(sl.emoji||'')+(sl.title?' '+sl.title:'');
   document.getElementById('playOverlay').classList.add('open');
