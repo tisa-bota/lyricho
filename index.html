@@ -130,16 +130,16 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
 .lines-area{flex:1;overflow-y:auto;padding:6px 14px 4px;min-height:0}
 
 /* Insert-between bar */
-.insert-bar{display:flex;align-items:center;height:22px;opacity:0;transition:opacity .15s;position:relative}
+.insert-bar{display:flex;align-items:center;height:16px;opacity:0;transition:opacity .2s;position:relative}
 .insert-bar:hover{opacity:1}
-.insert-bar::before{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:var(--border)}
-.insert-btns{display:flex;gap:4px;position:absolute;left:50%;transform:translateX(-50%);background:var(--surface);padding:0 6px;z-index:1}
-.ins-btn{background:var(--surface2);border:1px solid var(--border);font-family:inherit;font-size:0.68rem;font-weight:700;padding:3px 8px;border-radius:10px;cursor:pointer;white-space:nowrap;transition:all .15s}
-.ins-btn.chord{color:var(--blue);border-color:#1a2e3a}
+.insert-bar::before{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:var(--border);opacity:.5}
+.insert-btns{display:flex;gap:2px;position:absolute;left:50%;transform:translateX(-50%);background:var(--surface);padding:0 4px;z-index:1}
+.ins-btn{background:transparent;border:none;font-family:inherit;font-size:0.72rem;font-weight:600;padding:1px 6px;border-radius:6px;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s;letter-spacing:.02em}
+.ins-btn.chord{color:var(--blue)}
 .ins-btn.chord:hover{background:#1a2e3a}
-.ins-btn.lyric{color:#7a9fd4;border-color:#1a1e2a}
+.ins-btn.lyric{color:#7a9fd4}
 .ins-btn.lyric:hover{background:#1a1e2a}
-.ins-btn.section{color:var(--green);border-color:var(--hi-green)}
+.ins-btn.section{color:var(--green)}
 .ins-btn.section:hover{background:var(--hi-green)}
 
 .line-row{display:flex;align-items:flex-start;gap:6px;padding:3px 4px;border-radius:7px}
@@ -353,10 +353,7 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
   .chord-btn{min-width:36px;padding:6px 7px;font-size:0.78rem}
   .add-btn{font-size:0.74rem;padding:7px 8px}
   .song-item{padding:14px 14px}
-  .insert-bar{opacity:1}
-}
-
-/* ── TABLET / iPad (641px〜1024px) ── */
+  .insert-bar{opacity:.45}
 @media(min-width:641px) and (max-width:1024px){
   /* ヘッダー：戻るボタン＋Aボタンを表示 */
   .hdr-back{display:block}
@@ -393,8 +390,7 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
   .chord-btn{min-width:42px;padding:8px 10px;font-size:0.82rem}
   .add-btn{font-size:0.78rem;padding:8px 10px}
   .song-item{padding:14px 16px}
-  .insert-bar{opacity:1}
-  /* コードパネル少し広めに */
+  .insert-bar{opacity:.45}
   .chord-root-row{gap:6px}
   .chord-qual-row{gap:6px}
   /* タイプタグをタップしやすく */
@@ -1296,7 +1292,7 @@ function renderLines(){
   function makeInsertBar(afterIdx){
     const bar=document.createElement('div');bar.className='insert-bar';
     const btns=document.createElement('div');btns.className='insert-btns';
-    [['section','§ セクション'],['chord','♩ コード'],['lyric','✎ 歌詞']].forEach(([type,label])=>{
+    [['section','§'],['chord','♩'],['lyric','✎']].forEach(([type,label])=>{
       const b=document.createElement('button');b.className=`ins-btn ${type}`;b.textContent=label;
       b.onmousedown=e=>e.preventDefault();
       b.onclick=()=>insertLineAt(afterIdx+1,type);
