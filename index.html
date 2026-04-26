@@ -105,7 +105,7 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
 
 /* SONG EDITOR */
 .song-editor{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.ed-header{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap}
+.ed-header{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;position:sticky;top:0;z-index:10;background:var(--surface)}
 .title-inp{flex:1;min-width:80px;background:transparent;border:none;color:var(--text);font-family:inherit;font-size:1.1rem;font-weight:900;outline:none;letter-spacing:.04em}
 .title-inp::placeholder{color:var(--muted)}
 .key-wrap{display:flex;align-items:center;gap:5px;flex-shrink:0}
@@ -197,6 +197,10 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
 .chord-btn.qual .ql{font-size:0.62rem;opacity:.65;font-family:'JetBrains Mono',monospace}
 .chord-btn.qual:hover,.chord-btn.qual:active{background:#1e2a38;color:var(--blue)}
 .chord-sep{width:1px;background:var(--border);margin:0 2px;align-self:stretch}
+/* 特殊入力ボタン行 */
+.chord-special-row{display:flex;gap:4px;padding:5px 0 2px;border-top:1px solid var(--border);align-items:center}
+.chord-btn.special{border-color:#2a2038;color:#b090d8;font-size:0.76rem;min-width:0;padding:5px 10px}
+.chord-btn.special:hover,.chord-btn.special:active{background:#1e1830;color:var(--red)}
 
 /* SETLIST EDITOR */
 .set-editor{flex:1;display:flex;flex-direction:column;overflow:hidden}
@@ -245,6 +249,7 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:200;align-items:center;justify-content:center;padding:16px}
 .overlay.open{display:flex}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;width:min(100%,560px);max-height:88dvh;overflow-y:auto;padding:22px}
+.modal.wide{width:min(100%,820px)}
 .modal-ttl{font-size:1.1rem;font-weight:900;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
 .modal-ttl.amber{border-bottom-color:var(--amber);color:var(--amber)}
 .modal-close{margin-top:16px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700;font-size:0.85rem;width:100%}
@@ -409,21 +414,21 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
 
 /* ── PRINT / PDF styles ── */
 @media print{
-  body{background:#fff!important;color:#111!important;height:auto;overflow:visible}
+  body{background:#fff!important;color:#1a1e2a!important;height:auto;overflow:visible}
   .sidebar,.bottom-bar,.ed-header,.insert-bar,.del-btn,.type-tag,header{display:none!important}
   .app,.editor-area,.song-editor{display:block!important;overflow:visible;height:auto}
   .lines-area{overflow:visible;padding:0;height:auto}
   .line-row{break-inside:avoid;padding:1px 0}
   .type-section{margin-top:14px}
-  .type-section .line-inp{color:#7a5c00!important;border-bottom:1px solid #aaa!important;font-size:0.85rem}
-  .type-chord .line-inp{color:#1a5fa0!important;font-size:0.95rem}
-  .line-inp{background:transparent!important;border:none!important;resize:none;pointer-events:none;height:auto!important;overflow:visible}
+  .type-section .line-inp{color:#5a7a00!important;border-bottom:1px solid #d0dfa0!important;font-size:0.85rem}
+  .type-chord .line-inp{color:#1a6abf!important;font-size:0.95rem}
+  .line-inp{color:#1a1e2a!important;background:transparent!important;border:none!important;resize:none;pointer-events:none;height:auto!important;overflow:visible}
   .sec-presets{display:none!important}
-  #printTitle{display:block!important}
+  #printTitle{display:block!important;color:#1a1e2a!important}
   .overlay,.play-overlay{display:none!important}
 }
-#printTitle{display:none;font-size:1.4rem;font-weight:900;margin-bottom:4px;padding-bottom:8px;border-bottom:2px solid #333}
-#printKey{font-size:0.9rem;color:#1a5fa0;font-family:'JetBrains Mono',monospace;margin-bottom:16px;display:block}
+#printTitle{display:none;font-size:1.4rem;font-weight:900;margin-bottom:4px;padding-bottom:8px;border-bottom:2px solid #1a6abf}
+#printKey{font-size:0.9rem;color:#1a6abf;font-family:'JetBrains Mono',monospace;margin-bottom:16px;display:block}
 </style>
 </head>
 <body class="vlist">
@@ -512,6 +517,12 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
           <div class="chord-qual-row" id="chordQualRow">
             <span class="chord-qual-hint">← ルート音を選んでください</span>
           </div>
+          <div class="chord-special-row" id="chordSpecialRow">
+            <button class="chord-btn special" title="スペースを挿入" onmousedown="event.preventDefault()" onclick="insertSpecial(' ')">SPC</button>
+            <button class="chord-btn special" title="スラッシュ" onmousedown="event.preventDefault()" onclick="insertSpecial('/')">／</button>
+            <button class="chord-btn special" title="小節線" onmousedown="event.preventDefault()" onclick="insertSpecial(' | ')">｜</button>
+            <button class="chord-btn special" title="1文字削除" onmousedown="event.preventDefault()" onclick="chordBackspace()" style="margin-left:auto;color:var(--muted)">⌫</button>
+          </div>
         </div>
       </div>
     </div>
@@ -580,7 +591,7 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
 
 <!-- PREVIEW MODAL -->
 <div class="overlay" id="previewOverlay" onclick="if(event.target===this)closePreview()">
-  <div class="modal">
+  <div class="modal wide">
     <!-- toolbar -->
     <div class="prev-toolbar">
       <span class="prev-toolbar-lbl">テーマ</span>
@@ -717,7 +728,7 @@ let chordMode = 'name'; // 'name' | 'degree'
 let selectedRoot = null;
 let pdfOpt = 'print';
 
-const SECTION_PRESETS = ['イントロ','Aメロ','Bメロ','サビ','大サビ','Cメロ','ブリッジ','間奏','ソロ','アウトロ'];
+const SECTION_PRESETS = ['イントロ','Aメロ','Bメロ','サビ','大サビ','Cメロ','ブリッジ','間奏','ソロ','アウトロ','☆','☆repeat'];
 const SET_EMOJIS = ['📋','🎸','🎤','🎵','🎶','🎼','🎹','🥁','🎺','🎻','🪗','⭐','🔥','💎','🌟','🏆','📝','🎯','🎊','🚀'];
 
 // ── Root notes ──
@@ -798,7 +809,7 @@ function buildChordGrid(){
   rr.innerHTML=''; qr.innerHTML='';
 
   if(chordMode==='degree'){
-    btn.textContent='← コードネームに戻す';
+    btn.textContent='↩ コードネームに戻す';
     btn.className='degree-toggle-btn degree-mode';
     lbl.textContent='▸ ディグリーネーム — タップで挿入';
     DEGREE_NAMES.forEach((grp,gi)=>{
@@ -851,6 +862,44 @@ function toggleChordMode(){
   const song=currentSong();
   if(!song){toast('⚠ 曲を選択してください');return;}
   openDegreeModal();
+}
+
+function insertSpecial(ch){
+  // スペース・スラッシュ・小節線をカーソル位置に挿入
+  const song=currentSong();if(!song)return;
+  let tid=focusedChordId;
+  if(!tid){const cl=song.lines.filter(l=>l.type==='chord');if(cl.length)tid=cl[cl.length-1].id;}
+  if(!tid)return;
+  const line=song.lines.find(l=>l.id===tid);if(!line)return;
+  const el=document.getElementById('li-'+tid);
+  if(el){
+    const st=el.selectionStart,en=el.selectionEnd;
+    line.text=line.text.slice(0,st)+ch+line.text.slice(en);
+    saveSongs();renderLines();
+    setTimeout(()=>{const ne=document.getElementById('li-'+tid);if(ne){const p=st+ch.length;ne.inputMode='none';ne.setSelectionRange(p,p);ne.focus();}},10);
+  }
+}
+
+function chordBackspace(){
+  // コード行のカーソル位置から1文字削除
+  const song=currentSong();if(!song)return;
+  let tid=focusedChordId;
+  if(!tid){const cl=song.lines.filter(l=>l.type==='chord');if(cl.length)tid=cl[cl.length-1].id;}
+  if(!tid)return;
+  const line=song.lines.find(l=>l.id===tid);if(!line)return;
+  const el=document.getElementById('li-'+tid);
+  if(el){
+    const st=el.selectionStart,en=el.selectionEnd;
+    if(st===en&&st>0){
+      line.text=line.text.slice(0,st-1)+line.text.slice(st);
+      saveSongs();renderLines();
+      setTimeout(()=>{const ne=document.getElementById('li-'+tid);if(ne){const p=st-1;ne.inputMode='none';ne.setSelectionRange(p,p);ne.focus();}},10);
+    } else if(st!==en){
+      line.text=line.text.slice(0,st)+line.text.slice(en);
+      saveSongs();renderLines();
+      setTimeout(()=>{const ne=document.getElementById('li-'+tid);if(ne){ne.inputMode='none';ne.setSelectionRange(st,st);ne.focus();}},10);
+    }
+  }
 }
 
 function insertChord(ch){
