@@ -1,0 +1,32 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # コミットSHAの先頭8文字をビルドハッシュとして使用
+      - name: Generate build hash
+        id: hash
+        run: echo "value=$(echo ${{ github.sha }} | cut -c1-8)" >> $GITHUB_OUTPUT
+
+      # sw.js の __BUILD_HASH__ をハッシュに置換（元ファイルは変更しない）
+      - name: Inject hash into sw.js
+        run: sed -i "s/__BUILD_HASH__/${{ steps.hash.outputs.value }}/g" sw.js
+
+      # index.html を最新版（lyricho042701.html 等）にリネームして配置
+      # ※ リポジトリに index.html として置いている場合はこのステップは不要
+      # - name: Rename latest html
+      #   run: cp lyricho042701.html index.html
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
+          # gh-pages ブランチへ発行（GitHub Pages の Source を gh-pages に設定すること）

@@ -1592,7 +1592,8 @@ applyUiSize();
 (function initPWA(){
 
   // ── Service Worker 登録（sw.js は独立ファイル） ──
-  // sw.js 内の VERSION を上げるだけで全ユーザーのキャッシュが自動更新されます
+  // git push するたびに GitHub Actions が sw.js の __BUILD_HASH__ を
+  // コミットSHAに自動置換 → 全ユーザーのキャッシュが自動更新されます
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js', { scope: './' })
       .then(reg => {
