@@ -201,6 +201,8 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
 .chord-special-row{display:flex;gap:4px;padding:5px 0 2px;border-top:1px solid var(--border);align-items:center}
 .chord-btn.special{border-color:#2a2038;color:#b090d8;font-size:0.76rem;min-width:0;padding:5px 10px}
 .chord-btn.special:hover,.chord-btn.special:active{background:#1e1830;color:var(--red)}
+.chord-btn.special.bs{font-size:1.1rem;padding:5px 16px;border-color:#3a1a3a;color:#d080e0;min-width:52px}
+.chord-btn.special.bs:hover,.chord-btn.special.bs:active{background:#2a1040;color:var(--red)}
 
 /* SETLIST EDITOR */
 .set-editor{flex:1;display:flex;flex-direction:column;overflow:hidden}
@@ -412,6 +414,13 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
   .hdr-font-m{display:none!important}
 }
 
+/* PWA install banner */
+.pwa-banner{display:none;align-items:center;gap:10px;padding:7px 16px;background:#1a2a1a;border-bottom:1px solid #2e4a2e;flex-shrink:0;z-index:49}
+.pwa-banner.show{display:flex}
+.pwa-banner-txt{font-size:0.76rem;color:var(--green);flex:1}
+.pwa-banner-btn{background:var(--green);color:#0a1a04;border:none;padding:6px 14px;border-radius:6px;font-family:inherit;font-weight:700;font-size:0.76rem;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.pwa-banner-close{background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;padding:2px 6px;flex-shrink:0;line-height:1}
+
 /* ── PRINT / PDF styles ── */
 @media print{
   body{background:#fff!important;color:#1a1e2a!important;height:auto;overflow:visible}
@@ -441,6 +450,13 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
   <button class="hdr-font-m" id="hdrFontBtn" onclick="cycleUiSize()" title="文字サイズ">Ａ</button>
   <button class="hdr-btn-m hdr-new-m"  id="hdrNewBtn"  onclick="hdrNew()">＋</button>
 </header>
+
+<!-- PWA install banner (shown below header, not inside it) -->
+<div class="pwa-banner" id="pwaBanner">
+  <span class="pwa-banner-txt">📲 ホーム画面に追加してオフラインでも使えます</span>
+  <button class="pwa-banner-btn" id="pwaBannerBtn">インストール</button>
+  <button class="pwa-banner-close" id="pwaBannerClose" title="閉じる">×</button>
+</div>
 
 <div class="app">
   <aside class="sidebar">
@@ -521,7 +537,7 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
             <button class="chord-btn special" title="スペースを挿入" onmousedown="event.preventDefault()" onclick="insertSpecial(' ')">SPC</button>
             <button class="chord-btn special" title="スラッシュ" onmousedown="event.preventDefault()" onclick="insertSpecial('/')">／</button>
             <button class="chord-btn special" title="小節線" onmousedown="event.preventDefault()" onclick="insertSpecial(' | ')">｜</button>
-            <button class="chord-btn special" title="1文字削除" onmousedown="event.preventDefault()" onclick="chordBackspace()" style="margin-left:auto;color:var(--muted)">⌫</button>
+            <button class="chord-btn special bs" title="1文字削除" onmousedown="event.preventDefault()" onclick="chordBackspace()" style="margin-left:auto">⌫</button>
           </div>
         </div>
       </div>
@@ -1589,23 +1605,26 @@ applyUiSize();
 
   // ── インストールバナー（beforeinstallprompt）──
   let deferredPrompt = null;
+  const pwaBanner    = document.getElementById('pwaBanner');
+  const pwaBannerBtn = document.getElementById('pwaBannerBtn');
+  const pwaBannerClose = document.getElementById('pwaBannerClose');
+
   window.addEventListener('beforeinstallprompt', e=>{
     e.preventDefault();
     deferredPrompt = e;
-    // ヘッダーにインストールボタンを表示
-    const btn = document.createElement('button');
-    btn.className = 'hbtn';
-    btn.style.cssText = 'color:var(--green);border-color:#2e2608;flex-shrink:0;font-size:0.7rem;';
-    btn.textContent = '📲 インストール';
-    btn.title = 'ホーム画面に追加';
-    btn.onclick = async ()=>{
-      if(!deferredPrompt)return;
-      deferredPrompt.prompt();
-      const {outcome} = await deferredPrompt.userChoice;
-      if(outcome==='accepted') btn.remove();
-      deferredPrompt = null;
-    };
-    document.querySelector('header').appendChild(btn);
+    pwaBanner.classList.add('show');
+  });
+
+  pwaBannerBtn.addEventListener('click', async ()=>{
+    if(!deferredPrompt)return;
+    deferredPrompt.prompt();
+    const {outcome} = await deferredPrompt.userChoice;
+    if(outcome==='accepted') pwaBanner.classList.remove('show');
+    deferredPrompt = null;
+  });
+
+  pwaBannerClose.addEventListener('click', ()=>{
+    pwaBanner.classList.remove('show');
   });
 
   window.addEventListener('appinstalled', ()=>{
