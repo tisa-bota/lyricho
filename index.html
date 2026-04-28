@@ -134,13 +134,8 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
 .insert-bar:hover{opacity:1}
 .insert-bar::before{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:var(--border);opacity:.5}
 .insert-btns{display:flex;gap:2px;position:absolute;left:50%;transform:translateX(-50%);background:var(--surface);padding:0 4px;z-index:1}
-.ins-btn{background:var(--surface2);border:1px solid var(--border);font-family:inherit;font-size:0.8rem;font-weight:700;padding:2px 14px;border-radius:8px;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s;letter-spacing:.02em}
-.ins-btn.chord{color:var(--blue);border-color:var(--hi-blue)}
-.ins-btn.chord:hover{background:var(--hi-blue)}
-.ins-btn.lyric{color:#7a9fd4;border-color:#1a1e2a}
-.ins-btn.lyric:hover{background:#1a1e2a}
-.ins-btn.section{color:var(--green);border-color:var(--hi-green)}
-.ins-btn.section:hover{background:var(--hi-green)}
+.ins-btn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:inherit;font-size:0.9rem;font-weight:700;padding:2px 14px;border-radius:8px;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s;letter-spacing:.02em}
+.ins-btn:hover{background:var(--border);color:var(--text)}
 
 .line-row{display:flex;align-items:flex-start;gap:6px;padding:3px 4px;border-radius:7px}
 .line-row:hover{background:var(--surface2)}
@@ -164,26 +159,26 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
 
 /* BOTTOM TOOLBAR */
 .bottom-bar{flex-shrink:0;border-top:1px solid var(--border);background:var(--surface)}
-/* タブ式 追加バー */
+/* パネル非表示時はタブもパネルも隠す */
+.bottom-bar.panel-hidden .add-tab-bar,
+.bottom-bar.panel-hidden .chord-panel,
+.bottom-bar.panel-hidden .ins-section-panel,
+.bottom-bar.panel-hidden .ins-lyric-panel{display:none}
+/* タブバー */
 .add-tab-bar{display:flex;border-bottom:1px solid var(--border)}
-.add-tab{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 6px;font-family:inherit;font-size:0.82rem;font-weight:700;cursor:pointer;background:transparent;border:none;border-bottom:2px solid transparent;transition:all .18s;letter-spacing:.02em}
-.add-tab.section{color:var(--muted)}
-.add-tab.chord{color:var(--muted)}
-.add-tab.lyric{color:var(--muted)}
+.add-tab{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:9px 6px;font-family:inherit;font-size:0.8rem;font-weight:700;cursor:pointer;background:transparent;border:none;border-bottom:2px solid transparent;transition:all .18s;letter-spacing:.02em;color:var(--muted)}
 .add-tab.active.section{color:var(--green);border-bottom-color:var(--green);background:var(--hi-green)}
 .add-tab.active.chord{color:var(--blue);border-bottom-color:var(--blue);background:var(--hi-blue)}
 .add-tab.active.lyric{color:#7a9fd4;border-bottom-color:#7a9fd4;background:#1a1e2a}
-.add-tab:hover.section,.add-tab.section:active{color:var(--green);background:var(--hi-green)}
-.add-tab:hover.chord,.add-tab.chord:active{color:var(--blue);background:var(--hi-blue)}
-.add-tab:hover.lyric,.add-tab.lyric:active{color:#7a9fd4;background:#1a1e2a}
-.add-tab-action{display:flex;align-items:center;padding:6px 14px;border-bottom:1px solid var(--border)}
-.add-now-btn{flex:1;padding:8px 14px;border-radius:8px;border:none;font-family:inherit;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all .18s;text-align:center}
-.add-now-btn.section{background:var(--hi-green);color:var(--green);border:1px solid #2e2608}
-.add-now-btn.chord{background:var(--hi-blue);color:var(--blue);border:1px solid #1a3355}
-.add-now-btn.lyric{background:#1a1e2a;color:#7a9fd4;border:1px solid #2a304a}
-.add-now-btn.section:hover,.add-now-btn.section:active{background:#2e2608}
-.add-now-btn.chord:hover,.add-now-btn.chord:active{background:#1a3355}
-.add-now-btn.lyric:hover,.add-now-btn.lyric:active{background:#2a304a}
+/* セクションパネル */
+.ins-section-panel{padding:8px 14px 10px;display:none}
+.ins-section-panel.active{display:block}
+.ins-section-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.ins-lyric-panel{padding:10px 14px;display:none}
+.ins-lyric-panel.active{display:block}
+.ins-lyric-hint{font-size:0.72rem;color:var(--muted);margin-bottom:6px}
+/* パネル内コンテキストラベル */
+.panel-ctx{font-size:0.65rem;color:var(--muted);letter-spacing:.1em;padding:5px 14px 2px;border-bottom:1px solid var(--border)}
 
 /* 2-STEP CHORD PANEL */
 .chord-panel{padding:8px 14px 10px}
@@ -526,14 +521,20 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
       <!-- Print title (hidden normally, shown on print) -->
       <div id="printTitle"></div><span id="printKey"></span>
       <div class="lines-area" id="linesArea"></div>
-      <div class="bottom-bar">
+      <div class="bottom-bar panel-hidden" id="bottomBar">
+        <div class="panel-ctx" id="panelCtx"></div>
         <div class="add-tab-bar" id="addTabBar">
-          <button class="add-tab section active" id="addTabSection" onclick="setAddTab('section')">§ セクション</button>
-          <button class="add-tab chord" id="addTabChord" onclick="setAddTab('chord')">♩ コード</button>
-          <button class="add-tab lyric" id="addTabLyric" onclick="setAddTab('lyric')">✎ 歌詞</button>
+          <button class="add-tab section" id="addTabSection" onmousedown="event.preventDefault()" onclick="switchInsTab('section')">§ セクション</button>
+          <button class="add-tab chord"   id="addTabChord"   onmousedown="event.preventDefault()" onclick="switchInsTab('chord')">♩ コード</button>
+          <button class="add-tab lyric"   id="addTabLyric"   onmousedown="event.preventDefault()" onclick="switchInsTab('lyric')">✎ 歌詞</button>
         </div>
-        <div class="add-tab-action">
-          <button class="add-now-btn section" id="addNowBtn" onclick="addLine(currentAddType())">末尾に § セクションを追加</button>
+        <!-- セクションパネル -->
+        <div class="ins-section-panel" id="insSectionPanel">
+          <div class="ins-section-chips" id="insSectionChips"></div>
+        </div>
+        <!-- 歌詞パネル -->
+        <div class="ins-lyric-panel" id="insLyricPanel">
+          <div class="ins-lyric-hint">行をタップして歌詞を入力してください</div>
         </div>
         <div class="chord-panel">
           <div class="chord-panel-header">
@@ -811,7 +812,7 @@ function showEditor(){
   if(currentView==='songs'){const s=currentSong();document.getElementById('hdrTitle').textContent=s?.title||'（無題）';}
   else{const s=currentSet();document.getElementById('hdrTitle').textContent=(s?.emoji||'')+' '+(s?.title||'（無題）');}
 }
-function goBack(){showList();currentSongId=null;currentSetId=null;renderEditor();}
+function goBack(){showList();currentSongId=null;currentSetId=null;renderEditor();closeInsPanel();}
 function hdrNew(){if(currentView==='songs')newSong();else newSet();}
 
 // ══ TAB ══
@@ -1421,11 +1422,11 @@ function renderLines(){
     const bar=document.createElement('div');bar.className='insert-bar';
     const btns=document.createElement('div');btns.className='insert-btns';
     const b=document.createElement('button');
-    b.className=`ins-btn ${currentAddType()}`;
+    b.className='ins-btn';
     b.textContent='+';
-    b.title='ここに挿入';
+    b.title='ここに行を挿入';
     b.onmousedown=e=>e.preventDefault();
-    b.onclick=()=>insertLineAt(afterIdx+1,currentAddType());
+    b.onclick=()=>openInsertPanel(afterIdx+1);
     btns.appendChild(b);
     bar.appendChild(btns);return bar;
   }
@@ -1452,44 +1453,8 @@ function renderLines(){
     const row=document.createElement('div');row.className=`line-row type-${line.type}`;
     const tag=document.createElement('span');tag.className='type-tag';
     tag.textContent=line.type==='chord'?'C':line.type==='lyric'?'L':'§';
-    tag.title='タップで種類を切り替え';
-    tag.onclick=()=>{
-      // cycle: lyric → chord → section → lyric — DOM patch only, no full re-render
-      const cycle={lyric:'chord',chord:'section',section:'lyric'};
-      const newType=cycle[line.type]||'lyric';
-      line.type=newType;
-      saveSongs();
-      // Patch row class
-      row.className=`line-row type-${newType}`;
-      // Patch tag label
-      tag.textContent=newType==='chord'?'C':newType==='lyric'?'L':'§';
-      // Patch textarea class, placeholder, onfocus
-      inp.className='line-inp';
-      inp.placeholder=newType==='chord'?'Am  F  C  G …':newType==='section'?'セクション名…':'歌詞を入力…';
-      inp.onfocus=newType==='chord'?()=>{focusedChordId=line.id;}:null;
-      inp.inputMode=newType==='chord'?'none':'';
-      autoResize(inp);
-      // Show/hide section presets chip row
-      const chips=document.getElementById('chips-'+line.id);
-      if(newType==='section'){
-        // chips row may not exist yet — insert it before the row
-        if(!chips){
-          const ch=document.createElement('div');
-          ch.className='sec-presets'+(!line.text?' show':'');ch.id='chips-'+line.id;
-          SECTION_PRESETS.forEach(p=>{
-            const c=document.createElement('button');c.className='sec-chip';c.textContent=p;
-            c.onclick=()=>{line.text=p;inp.value=p;saveSongs();ch.classList.remove('show');autoResize(inp);};
-            ch.appendChild(c);
-          });
-          row.parentNode.insertBefore(ch,row);
-        } else {
-          chips.classList.toggle('show',!line.text);
-        }
-      } else {
-        if(chips)chips.remove();
-      }
-      inp.focus();
-    };
+    tag.title='タップで種類変更';
+    tag.onclick=()=>openLinePanel(line.id);
     const inp=document.createElement('textarea');inp.className='line-inp';inp.id='li-'+line.id;
     inp.value=line.text||'';inp.rows=1;inp.spellcheck=false;
     inp.placeholder=line.type==='chord'?'Am  F  C  G …':line.type==='section'?'セクション名…':'歌詞を入力…';
@@ -1514,9 +1479,9 @@ function renderLines(){
 
 function autoResize(el){el.style.height='auto';el.style.height=el.scrollHeight+'px';}
 
-function insertLineAt(idx,type){
+function insertLineAt(idx,type,text=''){
   const song=currentSong();if(!song)return;
-  const line={id:uid(),type,text:''};
+  const line={id:uid(),type,text};
   song.lines.splice(idx,0,line);
   // スクロール位置を保存してから再描画
   const area=document.getElementById('linesArea');
@@ -1530,30 +1495,142 @@ function insertLineAt(idx,type){
   },30);
 }
 
-function currentAddType(){
-  const active=document.querySelector('.add-tab.active');
-  if(!active)return'section';
-  if(active.id==='addTabChord')return'chord';
-  if(active.id==='addTabLyric')return'lyric';
-  return'section';
+// ══ INSERT / LINE PANEL ══
+// 状態：挿入先インデックス（insertMode）or 変更対象lineId（lineMode）
+let _panelInsertIdx = null; // null=lineMode, number=insertMode
+let _panelLineId    = null;
+let _panelTab       = 'section'; // 現在のアクティブタブ
+
+function openInsertPanel(afterIdx){
+  _panelInsertIdx = afterIdx;
+  _panelLineId    = null;
+  const ctx = document.getElementById('panelCtx');
+  if(ctx) ctx.textContent = afterIdx===0?'先頭に挿入':'行の後に挿入';
+  _showPanel(_panelTab);
 }
 
-function setAddTab(type){
-  document.querySelectorAll('.add-tab').forEach(t=>t.classList.remove('active'));
-  const map={section:'addTabSection',chord:'addTabChord',lyric:'addTabLyric'};
-  document.getElementById(map[type])?.classList.add('active');
-  // ボタンラベル・スタイル更新
-  const btn=document.getElementById('addNowBtn');
-  if(!btn)return;
-  btn.className=`add-now-btn ${type}`;
-  const labels={section:'末尾に § セクションを追加',chord:'末尾に ♩ コードを追加',lyric:'末尾に ✎ 歌詞を追加'};
-  btn.textContent=labels[type]||'末尾に追加';
-  // 挿入バーの色も更新
+function openLinePanel(lineId){
+  _panelInsertIdx = null;
+  _panelLineId    = lineId;
+  // 現在の行タイプをデフォルトタブに
+  const song=currentSong();
+  const line=song?.lines.find(l=>l.id===lineId);
+  const tab = line ? line.type : 'section';
+  const ctx = document.getElementById('panelCtx');
+  if(ctx) ctx.textContent = '行の種類を変更';
+  _showPanel(tab);
+}
+
+function switchInsTab(type){
+  _panelTab = type;
+  _showPanel(type);
+}
+
+function _showPanel(type){
+  _panelTab = type;
+  const bar = document.getElementById('bottomBar');
+  if(bar) bar.classList.remove('panel-hidden');
+
+  // タブアクティブ
+  ['section','chord','lyric'].forEach(t=>{
+    document.getElementById('addTab'+t.charAt(0).toUpperCase()+t.slice(1))
+      ?.classList.toggle('active', t===type);
+  });
+
+  // パネル表示切替
+  document.getElementById('insSectionPanel')?.classList.toggle('active', type==='section');
+  document.getElementById('insLyricPanel')  ?.classList.toggle('active', type==='lyric');
+  // コードパネルは chord タブのときだけ visible
+  const cp = document.querySelector('.chord-panel');
+  if(cp) cp.style.display = type==='chord' ? '' : 'none';
+
+  if(type==='section') _buildSectionPanel();
+  if(type==='chord')   _activateChordPanel();
+  if(type==='lyric')   _activateLyricPanel();
+}
+
+function _buildSectionPanel(){
+  const container = document.getElementById('insSectionChips');
+  if(!container) return;
+  container.innerHTML='';
+  SECTION_PRESETS.forEach(p=>{
+    const c=document.createElement('button');c.className='sec-chip';c.textContent=p;
+    c.onmousedown=e=>e.preventDefault();
+    c.onclick=()=>_commitWithText(p,'section');
+    container.appendChild(c);
+  });
+}
+
+function _activateChordPanel(){
+  // コードパネルは insertChord() 経由で _commitWithText が呼ばれるように
+  // insertChord をフックしておく（既存の focusedChordId を流用）
+  if(_panelLineId){
+    const song=currentSong();
+    const line=song?.lines.find(l=>l.id===_panelLineId);
+    if(line && line.type==='chord') focusedChordId=_panelLineId;
+    // 行タイプをchordに変更
+    _applyLineType('chord');
+  }
+  // insertChord は focusedChordId の textarea に書き込む → そのままでOK
+}
+
+function _activateLyricPanel(){
+  if(_panelLineId){
+    _applyLineType('lyric');
+    setTimeout(()=>{
+      const el=document.getElementById('li-'+_panelLineId);
+      if(el){el.inputMode='';el.focus();}
+    },30);
+  } else {
+    // 挿入モード：行を作ってフォーカス
+    _commitWithText('','lyric');
+  }
+}
+
+// 種類だけ変更（テキストなし）
+function _applyLineType(newType){
+  if(!_panelLineId) return;
+  const song=currentSong();
+  const line=song?.lines.find(l=>l.id===_panelLineId);
+  if(!line||line.type===newType) return;
+  line.type=newType; saveSongs();
+  // DOM patch
+  const row=document.querySelector(`.line-row`);
+  // full re-render が安全
+  const area=document.getElementById('linesArea');
+  const sc=area?.scrollTop||0;
   renderLines();
+  if(area)area.scrollTop=sc;
+}
+
+// 確定（テキスト付き挿入 or 行変更）
+function _commitWithText(text, type){
+  if(_panelInsertIdx !== null){
+    // 挿入モード
+    insertLineAt(_panelInsertIdx, type, text);
+  } else if(_panelLineId){
+    // 変更モード
+    const song=currentSong();
+    const line=song?.lines.find(l=>l.id===_panelLineId);
+    if(line){line.type=type;if(text)line.text=text;saveSongs();}
+    const area=document.getElementById('linesArea');
+    const sc=area?.scrollTop||0;
+    renderLines();
+    if(area)area.scrollTop=sc;
+  }
+  // パネルを閉じる
+  closeInsPanel();
+}
+
+function closeInsPanel(){
+  const bar=document.getElementById('bottomBar');
+  if(bar) bar.classList.add('panel-hidden');
+  // コードパネルを元に戻す
+  const cp=document.querySelector('.chord-panel');
+  if(cp) cp.style.display='';
 }
 
 function addLine(type){
-
   const song=currentSong();if(!song)return;
   insertLineAt(song.lines.length,type);
 }
