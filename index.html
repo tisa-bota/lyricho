@@ -181,7 +181,7 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
 .panel-ctx{font-size:0.65rem;color:var(--muted);letter-spacing:.1em;padding:5px 14px 2px;border-bottom:1px solid var(--border)}
 
 /* 2-STEP CHORD PANEL */
-.chord-panel{padding:8px 14px 10px}
+.chord-panel{padding:8px 14px 10px;display:none}
 .chord-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .chord-lbl{font-size:0.63rem;color:var(--muted);letter-spacing:.12em}
 .degree-toggle-btn{background:var(--hi-blue);border:1px solid #1a3355;color:var(--blue);font-family:inherit;font-size:0.68rem;font-weight:700;padding:3px 9px;border-radius:10px;cursor:pointer;transition:all .2s;white-space:nowrap}
@@ -249,9 +249,9 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
 .play-content{flex:1;overflow-y:auto;padding:16px 20px}
 .play-song-title{font-size:1.4rem;font-weight:900;margin-bottom:4px}
 .play-song-key{font-family:'JetBrains Mono',monospace;font-size:1rem;color:var(--blue);font-weight:700;margin-bottom:18px;display:block}
-.play-section{font-weight:900;color:var(--green);font-size:0.82rem;letter-spacing:.12em;text-transform:uppercase;display:block;margin-top:20px;margin-bottom:4px;border-bottom:1px solid var(--hi-green);padding-bottom:4px}
-.play-chord{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--blue);font-size:1.05rem;display:block;margin-top:4px}
-.play-lyric{display:block;font-size:0.95rem;line-height:2}
+.play-section{font-weight:900;color:var(--green);font-size:0.82rem;letter-spacing:.12em;text-transform:uppercase;display:block;margin-top:14px;margin-bottom:2px;border-bottom:1px solid var(--hi-green);padding-bottom:2px}
+.play-chord{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--blue);font-size:1.05rem;display:block;margin-top:2px}
+.play-lyric{display:block;font-size:0.95rem;line-height:1.6}
 
 /* MODALS */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:200;align-items:center;justify-content:center;padding:16px}
@@ -272,9 +272,9 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
 .ats-check{font-size:0.75rem;color:var(--muted)}
 
 /* preview modal */
-.prev-section{font-weight:900;font-size:calc(var(--prev-base)*0.88);letter-spacing:.12em;text-transform:uppercase;display:block;margin-top:20px;margin-bottom:4px;padding-bottom:4px}
-.prev-chord{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:calc(var(--prev-base)*1.02);display:block;margin-top:4px;white-space:pre-wrap;word-break:break-all}
-.prev-lyric{display:block;font-size:var(--prev-base);line-height:1.9;white-space:pre-wrap}
+.prev-section{font-weight:900;font-size:calc(var(--prev-base)*0.88);letter-spacing:.12em;text-transform:uppercase;display:block;margin-top:14px;margin-bottom:2px;padding-bottom:2px}
+.prev-chord{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:calc(var(--prev-base)*1.02);display:block;margin-top:2px;white-space:pre-wrap;word-break:break-all}
+.prev-lyric{display:block;font-size:var(--prev-base);line-height:1.6;white-space:pre-wrap}
 .modal-ttl-preview{font-size:calc(var(--prev-base)*1.3);font-weight:900;margin-bottom:10px;padding-bottom:10px}
 
 /* preview toolbar */
@@ -431,17 +431,18 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
   .sidebar,.bottom-bar,.ed-header,.insert-bar,.del-btn,.type-tag,header{display:none!important}
   .app,.editor-area,.song-editor{display:block!important;overflow:visible;height:auto}
   .lines-area{overflow:visible;padding:0;height:auto}
-  .line-row{break-inside:avoid;padding:1px 0}
-  .type-section{margin-top:14px}
+  .line-row{break-inside:avoid;padding:0}
+  .type-section{margin-top:10px}
   .type-section .line-inp{color:#5a7a00!important;border-bottom:1px solid #d0dfa0!important;font-size:0.85rem}
   .type-chord .line-inp{color:#1a6abf!important;font-size:0.95rem}
-  .line-inp{color:#1a1e2a!important;background:transparent!important;border:none!important;resize:none;pointer-events:none;height:auto!important;overflow:visible}
+  .line-inp{color:#1a1e2a!important;background:transparent!important;border:none!important;resize:none;pointer-events:none;height:auto!important;overflow:visible;padding:2px 7px!important;min-height:unset!important;line-height:1.5!important}
   .sec-presets{display:none!important}
   #printTitle{display:block!important;color:#1a1e2a!important}
+  #printKey{display:block!important}
   .overlay,.play-overlay{display:none!important}
 }
 #printTitle{display:none;font-size:1.4rem;font-weight:900;margin-bottom:4px;padding-bottom:8px;border-bottom:2px solid #1a6abf}
-#printKey{font-size:0.9rem;color:#1a6abf;font-family:'JetBrains Mono',monospace;margin-bottom:16px;display:block}
+#printKey{font-size:0.9rem;color:#1a6abf;font-family:'JetBrains Mono',monospace;margin-bottom:16px;display:none}
 </style>
 </head>
 <body class="vlist">
@@ -1529,7 +1530,10 @@ function switchInsTab(type){
 function _showPanel(type){
   _panelTab = type;
   const bar = document.getElementById('bottomBar');
+  const area = document.getElementById('linesArea');
+  const savedScroll = area ? area.scrollTop : 0;
   if(bar) bar.classList.remove('panel-hidden');
+  if(area) area.scrollTop = savedScroll;
 
   // タブアクティブ
   ['section','chord','lyric'].forEach(t=>{
@@ -1542,7 +1546,7 @@ function _showPanel(type){
   document.getElementById('insLyricPanel')  ?.classList.toggle('active', type==='lyric');
   // コードパネルは chord タブのときだけ visible
   const cp = document.querySelector('.chord-panel');
-  if(cp) cp.style.display = type==='chord' ? '' : 'none';
+  if(cp) cp.style.display = type==='chord' ? 'block' : 'none';
 
   if(type==='section') _buildSectionPanel();
   if(type==='chord')   _activateChordPanel();
@@ -1625,9 +1629,9 @@ function _commitWithText(text, type){
 function closeInsPanel(){
   const bar=document.getElementById('bottomBar');
   if(bar) bar.classList.add('panel-hidden');
-  // コードパネルを元に戻す
+  // コードパネルを元に戻す（panel-hidden時はCSSで隠れるがinline styleも戻す）
   const cp=document.querySelector('.chord-panel');
-  if(cp) cp.style.display='';
+  if(cp) cp.style.display='none';
 }
 
 function addLine(type){
