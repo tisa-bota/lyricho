@@ -1498,20 +1498,27 @@ function insertLineAt(idx,type,text=''){
 
 // ══ INSERT / LINE PANEL ══
 // 状態：挿入先インデックス（insertMode）or 変更対象lineId（lineMode）
-let _panelInsertIdx = null; // null=lineMode, number=insertMode
 let _panelLineId    = null;
 let _panelTab       = 'section'; // 現在のアクティブタブ
 
 function openInsertPanel(afterIdx){
-  _panelInsertIdx = afterIdx;
-  _panelLineId    = null;
+  // ① まず歌詞行を挿入（デフォルト）
+  const song = currentSong(); if(!song) return;
+  const newLine = {id:uid(), type:'lyric', text:''};
+  song.lines.splice(afterIdx, 0, newLine);
+  const area = document.getElementById('linesArea');
+  const savedScroll = area ? area.scrollTop : 0;
+  saveSongs(); renderLines();
+  if(area) area.scrollTop = savedScroll;
+
+  // ② 挿入した行を「変更モード」でパネルを開く（歌詞タブをデフォルトに）
+  _panelLineId    = newLine.id;
   const ctx = document.getElementById('panelCtx');
-  if(ctx) ctx.textContent = afterIdx===0?'先頭に挿入':'行の後に挿入';
-  _showPanel(_panelTab);
+  if(ctx) ctx.textContent = '行の種類を選択';
+  _showPanel('lyric');
 }
 
 function openLinePanel(lineId){
-  _panelInsertIdx = null;
   _panelLineId    = lineId;
   // 現在の行タイプをデフォルトタブに
   const song=currentSong();
@@ -1579,16 +1586,12 @@ function _activateChordPanel(){
 }
 
 function _activateLyricPanel(){
-  if(_panelLineId){
-    _applyLineType('lyric');
-    setTimeout(()=>{
-      const el=document.getElementById('li-'+_panelLineId);
-      if(el){el.inputMode='';el.focus();}
-    },30);
-  } else {
-    // 挿入モード：行を作ってフォーカス
-    _commitWithText('','lyric');
-  }
+  if(!_panelLineId) return;
+  _applyLineType('lyric');
+  setTimeout(()=>{
+    const el=document.getElementById('li-'+_panelLineId);
+    if(el){el.inputMode='';el.focus();}
+  },30);
 }
 
 // 種類だけ変更（テキストなし）
@@ -1607,13 +1610,9 @@ function _applyLineType(newType){
   if(area)area.scrollTop=sc;
 }
 
-// 確定（テキスト付き挿入 or 行変更）
+// 確定（テキスト付き行変更）
 function _commitWithText(text, type){
-  if(_panelInsertIdx !== null){
-    // 挿入モード
-    insertLineAt(_panelInsertIdx, type, text);
-  } else if(_panelLineId){
-    // 変更モード
+  if(_panelLineId){
     const song=currentSong();
     const line=song?.lines.find(l=>l.id===_panelLineId);
     if(line){line.type=type;if(text)line.text=text;saveSongs();}
@@ -1622,7 +1621,6 @@ function _commitWithText(text, type){
     renderLines();
     if(area)area.scrollTop=sc;
   }
-  // パネルを閉じる
   closeInsPanel();
 }
 
