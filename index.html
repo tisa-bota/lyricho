@@ -150,7 +150,7 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
 .sec-presets.show{display:flex}
 .sec-chip{background:var(--hi-green);border:1px solid #2e2608;color:var(--green);font-size:0.71rem;font-weight:700;padding:4px 10px;border-radius:12px;cursor:pointer;font-family:inherit;letter-spacing:.05em;transition:all .15s}
 .sec-chip:hover,.sec-chip:active{background:#2e2608}
-.line-inp{flex:1;background:transparent;border:1px solid transparent;color:var(--text);font-family:inherit;font-size:calc(0.91rem * var(--ui-scale));padding:6px 7px;border-radius:5px;outline:none;resize:none;overflow:hidden;min-height:34px;line-height:1.6;transition:border .15s}
+.line-inp{flex:1;background:transparent;border:1px solid transparent;color:var(--text);font-family:inherit;font-size:calc(0.91rem * var(--ui-scale));padding:6px 7px;border-radius:5px;outline:none;resize:none;overflow:hidden;min-height:34px;line-height:1.6;transition:border .15s;touch-action:none}
 .type-chord .line-inp{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--blue);font-size:calc(0.94rem * var(--ui-scale))}
 .line-inp:focus{border-color:var(--border)!important;background:var(--surface2)!important}
 .del-btn{color:var(--muted);background:none;border:none;cursor:pointer;font-size:1rem;padding:5px 3px;margin-top:3px;flex-shrink:0;transition:color .15s;opacity:0}
@@ -1703,6 +1703,29 @@ function applyUiSize(){
 function setUiSize(sz){uiSize=sz;applyUiSize();}
 function cycleUiSize(){const order=['s','m','l'];uiSize=order[(order.indexOf(uiSize)+1)%3];applyUiSize();}
 applyUiSize();
+
+// ══ textarea タッチスクロール修正 ══
+// touch-action:none の textarea 上でのスワイプを linesArea のスクロールに変換
+(function(){
+  const linesArea = document.getElementById('linesArea');
+  if(!linesArea) return;
+  let _ty = 0;
+  linesArea.addEventListener('touchstart', e=>{
+    const t = e.target;
+    if(t && t.classList && t.classList.contains('line-inp')){
+      _ty = e.touches[0].clientY;
+    }
+  }, {passive:true});
+  linesArea.addEventListener('touchmove', e=>{
+    const t = e.target;
+    if(t && t.classList && t.classList.contains('line-inp')){
+      const dy = _ty - e.touches[0].clientY;
+      _ty = e.touches[0].clientY;
+      linesArea.scrollTop += dy;
+      e.preventDefault();
+    }
+  }, {passive:false});
+})();
 
 // ══ PWA ══
 (function initPWA(){
