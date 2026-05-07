@@ -19,13 +19,35 @@
   --bg:#13151c; --surface:#1c1f28; --surface2:#252a36; --border:#303644;
   --text:#e8edf8; --muted:#7a8496;
   --red:#c084fc;   /* pastel purple  → song / delete */
-  --blue:#6ee7c7;  /* pastel emerald → chord */
-  --green:#fde68a; /* pastel yellow  → section */
+  --blue:#6ee7c7;  /* pastel emerald → chord [cool] */
+  --green:#fde68a; /* pastel yellow  → section [cool] */
   --amber:#fdba74; /* pastel orange  → setlist */
   --hi-red:#221a30; --hi-blue:#142820; --hi-green:#2a2408; --hi-amber:#2a1e0e;
+  /* color set tokens (overridden by .warm-set on body) */
+  --cs-chord:#6ee7c7;    /* cool: emerald */
+  --cs-section:#fde68a;  /* cool: yellow */
+  --cs-hi-chord:#142820;
+  --cs-hi-section:#2a2408;
+  --cs-chord-border:#1a3355;
+  --cs-section-border:#2e2608;
   --safe-b:env(safe-area-inset-bottom,0px);
   --ui-scale:1; /* font size scale: set by JS */
 }
+/* ── COLOR SETS ── */
+/* warm set: chord=hot pink/magenta, section=gold */
+body.warm-set{
+  --cs-chord:#f472b6;    /* pastel pink-magenta */
+  --cs-section:#fbbf24;  /* amber gold */
+  --cs-hi-chord:#2a0f1e;
+  --cs-hi-section:#2a1e00;
+  --cs-chord-border:#3a1030;
+  --cs-section-border:#3a2800;
+  --blue:#f472b6;
+  --green:#fbbf24;
+  --hi-blue:#2a0f1e;
+  --hi-green:#2a1e00;
+}
+
 /* Global font scale */
 body{font-size:calc(14px * var(--ui-scale))}
 .song-name,.set-name{font-size:calc(0.86rem * var(--ui-scale))}
@@ -124,6 +146,19 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
 .ui-size-btn.active{background:var(--hi-blue);border-color:var(--blue);color:var(--blue)}
 .ui-size-btn:hover:not(.active){color:var(--text);border-color:var(--border)}
 @media(max-width:1024px){.ui-size-btns{display:none}}
+/* color set toggle */
+.color-set-btns{display:flex;align-items:center;gap:3px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:3px 6px;flex-shrink:0}
+.color-set-lbl{font-size:0.7rem;color:var(--muted);margin-right:2px;font-weight:700;letter-spacing:.05em}
+.color-set-btn{background:none;border:1px solid transparent;color:var(--muted);font-family:inherit;font-size:0.72rem;font-weight:700;padding:2px 7px;border-radius:5px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:3px}
+.color-set-btn .cs-dot{display:inline-block;width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.color-set-btn.active.cool{background:#142820;border-color:#6ee7c7;color:#6ee7c7}
+.color-set-btn.active.warm{background:#2a1010;border-color:#f87171;color:#f87171}
+.color-set-btn:hover:not(.active){color:var(--text);border-color:var(--border)}
+@media(max-width:1024px){.color-set-btns{display:none}}
+/* mobile color cycle button */
+.hdr-color-m{display:none;align-items:center;font-family:inherit;font-weight:900;cursor:pointer;padding:5px 9px;border-radius:6px;font-size:0.82rem;flex-shrink:0;white-space:nowrap;background:var(--bg);border:1px solid var(--border);color:var(--muted);transition:all .2s}
+.hdr-color-m:hover{border-color:var(--blue);color:var(--blue)}
+@media(max-width:1024px){.hdr-color-m{display:flex}}
 .hbtn.pdf:hover{border-color:var(--amber)}
 
 /* LINES */
@@ -283,10 +318,14 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
 .prev-theme-btns,.prev-size-btns{display:flex;gap:4px}
 .prev-tbtn{padding:4px 11px;border-radius:12px;font-family:inherit;font-size:0.73rem;font-weight:700;cursor:pointer;border:1px solid;transition:all .15s;white-space:nowrap}
 
-/* dark theme (default) */
-.prev-wrap.theme-dark{--prev-bg:var(--bg);--prev-surface:var(--surface);--prev-text:var(--text);--prev-muted:var(--muted);--prev-border:var(--border);--prev-chord-c:var(--blue);--prev-section-c:var(--green);--prev-section-border:var(--hi-green);--prev-title-border:var(--blue)}
-/* light theme */
+/* dark cool (default) */
+.prev-wrap.theme-dark{--prev-bg:var(--bg);--prev-surface:var(--surface);--prev-text:var(--text);--prev-muted:var(--muted);--prev-border:var(--border);--prev-chord-c:#6ee7c7;--prev-section-c:#fde68a;--prev-section-border:#2a2408;--prev-title-border:#6ee7c7}
+/* dark warm */
+.prev-wrap.theme-dark-warm{--prev-bg:var(--bg);--prev-surface:var(--surface);--prev-text:var(--text);--prev-muted:var(--muted);--prev-border:var(--border);--prev-chord-c:#f472b6;--prev-section-c:#fbbf24;--prev-section-border:#2a1e00;--prev-title-border:#f472b6}
+/* light cool */
 .prev-wrap.theme-light{--prev-bg:#f8f9fc;--prev-surface:#ffffff;--prev-text:#1a1e2a;--prev-muted:#8a93a6;--prev-border:#dde2ee;--prev-chord-c:#1a6abf;--prev-section-c:#5a7a00;--prev-section-border:#d0dfa0;--prev-title-border:#1a6abf}
+/* light warm */
+.prev-wrap.theme-light-warm{--prev-bg:#fff8f4;--prev-surface:#ffffff;--prev-text:#1a1010;--prev-muted:#9a8078;--prev-border:#e8d0c4;--prev-chord-c:#b0306a;--prev-section-c:#b07800;--prev-section-border:#f0d080;--prev-title-border:#b0306a}
 
 .prev-wrap{background:var(--prev-bg);color:var(--prev-text);border-radius:10px;padding:18px 20px;transition:background .2s,color .2s}
 .prev-wrap .modal-ttl-preview{border-bottom:2px solid var(--prev-title-border);color:var(--prev-text)}
@@ -295,10 +334,14 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
 .prev-wrap .prev-lyric{color:var(--prev-text)}
 
 /* theme toggle buttons */
-.prev-tbtn.theme-dark-btn{background:var(--bg);border-color:var(--border);color:var(--muted)}
-.prev-tbtn.theme-dark-btn.active{background:var(--surface2);border-color:var(--blue);color:var(--blue)}
-.prev-tbtn.theme-light-btn{background:#f0f4ff;border-color:#c8d0e8;color:#4a5580}
+.prev-tbtn.theme-dark-btn{background:var(--surface2);border-color:var(--border);color:var(--muted)}
+.prev-tbtn.theme-dark-btn.active{background:#142820;border-color:#6ee7c7;color:#6ee7c7}
+.prev-tbtn.theme-dark-warm-btn{background:var(--surface2);border-color:var(--border);color:var(--muted)}
+.prev-tbtn.theme-dark-warm-btn.active{background:#2a0f1e;border-color:#f472b6;color:#f472b6}
+.prev-tbtn.theme-light-btn{background:#eef2ff;border-color:#c8d0e8;color:#6a7aaa}
 .prev-tbtn.theme-light-btn.active{background:#d8e4ff;border-color:#1a6abf;color:#1a6abf}
+.prev-tbtn.theme-light-warm-btn{background:#fff4ee;border-color:#e8c4a8;color:#b06040}
+.prev-tbtn.theme-light-warm-btn.active{background:#ffe0d8;border-color:#b0306a;color:#b0306a}
 /* size toggle buttons */
 .prev-tbtn.size-btn{background:var(--surface2);border-color:var(--border);color:var(--muted)}
 .prev-tbtn.size-btn.active{background:var(--hi-blue);border-color:var(--blue);color:var(--blue)}
@@ -435,6 +478,9 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
   .type-section{margin-top:10px}
   .type-section .line-inp{color:#5a7a00!important;border-bottom:1px solid #d0dfa0!important;font-size:0.85rem}
   .type-chord .line-inp{color:#1a6abf!important;font-size:0.95rem}
+  /* warm set print colors */
+  body.warm-set .type-section .line-inp{color:#b07800!important;border-bottom:1px solid #f0d080!important}
+  body.warm-set .type-chord .line-inp{color:#b0306a!important}
   .line-inp{color:#1a1e2a!important;background:transparent!important;border:none!important;resize:none;pointer-events:none;height:auto!important;overflow:visible;padding:2px 7px!important;min-height:unset!important;line-height:1.5!important}
   .sec-presets{display:none!important}
   #printTitle{display:block!important;color:#1a1e2a!important}
@@ -453,6 +499,7 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
   <h1 class="hdr-title" id="hdrTitle">コード譜メモ帳</h1>
   <button class="hdr-btn-m hdr-sort-m" id="hdrSortBtn" onclick="toggleSort()">あ↑</button>
   <button class="hdr-font-m" id="hdrFontBtn" onclick="cycleUiSize()" title="文字サイズ">Ａ</button>
+  <button class="hdr-color-m" id="hdrColorBtn" onclick="cycleColorSet()" title="カラーセット">🎨</button>
   <button class="hdr-btn-m hdr-new-m"  id="hdrNewBtn"  onclick="hdrNew()">＋</button>
 </header>
 
@@ -517,6 +564,11 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
           <button class="ui-size-btn" id="uiSizeS" onclick="setUiSize('s')">小</button>
           <button class="ui-size-btn active" id="uiSizeM" onclick="setUiSize('m')">中</button>
           <button class="ui-size-btn" id="uiSizeL" onclick="setUiSize('l')">大</button>
+        </div>
+        <div class="color-set-btns" id="colorSetBtns">
+          <span class="color-set-lbl">🎨</span>
+          <button class="color-set-btn cool active" id="colorSetCool" onclick="setColorSet('cool')"><span class="cs-dot" style="background:#6ee7c7"></span>Cool</button>
+          <button class="color-set-btn warm"        id="colorSetWarm" onclick="setColorSet('warm')"><span class="cs-dot" style="background:#f87171"></span>Warm</button>
         </div>
       </div>
       <!-- Print title (hidden normally, shown on print) -->
@@ -625,8 +677,10 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
     <div class="prev-toolbar">
       <span class="prev-toolbar-lbl">テーマ</span>
       <div class="prev-theme-btns">
-        <button class="prev-tbtn theme-dark-btn  active" id="prevThemeDark"  onclick="setPreviewTheme('dark')">🌙 ダーク</button>
-        <button class="prev-tbtn theme-light-btn"        id="prevThemeLight" onclick="setPreviewTheme('light')">☀️ ライト</button>
+        <button class="prev-tbtn theme-dark-btn       active" id="prevThemeDark"      onclick="setPreviewTheme('dark')">🌙 ダーク</button>
+        <button class="prev-tbtn theme-dark-warm-btn"         id="prevThemeDarkWarm"  onclick="setPreviewTheme('dark-warm')">🌕 ダーク</button>
+        <button class="prev-tbtn theme-light-btn"             id="prevThemeLight"     onclick="setPreviewTheme('light')">☀️ ライト</button>
+        <button class="prev-tbtn theme-light-warm-btn"        id="prevThemeLightWarm" onclick="setPreviewTheme('light-warm')">🌅 ライト</button>
       </div>
       <span class="prev-toolbar-lbl" style="margin-left:6px">文字サイズ</span>
       <div class="prev-size-btns">
@@ -1173,12 +1227,15 @@ function applyPreviewClasses(){
   const w=document.getElementById('prevWrap');
   w.className=`prev-wrap theme-${prevTheme} size-${prevSize}`;
   document.getElementById('prevThemeDark').classList.toggle('active',prevTheme==='dark');
+  document.getElementById('prevThemeDarkWarm').classList.toggle('active',prevTheme==='dark-warm');
   document.getElementById('prevThemeLight').classList.toggle('active',prevTheme==='light');
+  document.getElementById('prevThemeLightWarm').classList.toggle('active',prevTheme==='light-warm');
   ['s','m','l'].forEach(s=>{
     document.getElementById('prevSize'+s.toUpperCase()).classList.toggle('active',prevSize===s);
   });
   const mc=document.querySelector('#previewOverlay .modal-close');
-  if(mc){mc.style.background=prevTheme==='light'?'#eef1fa':'';mc.style.color=prevTheme==='light'?'#2a3050':'';}
+  const isLight = prevTheme==='light'||prevTheme==='light-warm';
+  if(mc){mc.style.background=isLight?'#eef1fa':'';mc.style.color=isLight?'#2a3050':'';}
 }
 function setPreviewTheme(t){prevTheme=t;applyPreviewClasses();}
 function setPreviewSize(s){prevSize=s;applyPreviewClasses();}
@@ -1701,6 +1758,24 @@ function applyUiSize(){
 function setUiSize(sz){uiSize=sz;applyUiSize();}
 function cycleUiSize(){const order=['s','m','l'];uiSize=order[(order.indexOf(uiSize)+1)%3];applyUiSize();}
 applyUiSize();
+
+// ══ COLOR SET ══
+let colorSet = localStorage.getItem('crd_colorset') || 'cool';
+function applyColorSet(){
+  document.body.classList.toggle('warm-set', colorSet === 'warm');
+  // desktop buttons
+  const bc = document.getElementById('colorSetCool');
+  const bw = document.getElementById('colorSetWarm');
+  if(bc){ bc.classList.toggle('active', colorSet==='cool'); }
+  if(bw){ bw.classList.toggle('active', colorSet==='warm'); }
+  // mobile button
+  const hb = document.getElementById('hdrColorBtn');
+  if(hb){ hb.textContent = colorSet==='cool' ? '🧊' : '🔥'; }
+  localStorage.setItem('crd_colorset', colorSet);
+}
+function setColorSet(s){ colorSet=s; applyColorSet(); }
+function cycleColorSet(){ colorSet = colorSet==='cool' ? 'warm' : 'cool'; applyColorSet(); }
+applyColorSet();
 
 // ══ textarea タッチスクロール修正 ══
 // touch-action:none の textarea 上でのスワイプを linesArea のスクロールに変換
