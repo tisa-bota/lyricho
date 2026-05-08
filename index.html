@@ -482,13 +482,27 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
   body.warm-set .type-section .line-inp{color:#b07800!important;border-bottom:1px solid #f0d080!important}
   body.warm-set .type-chord .line-inp{color:#b0306a!important}
   .line-inp{color:#1a1e2a!important;background:transparent!important;border:none!important;resize:none;pointer-events:none;height:auto!important;overflow:visible;padding:2px 7px!important;min-height:unset!important;line-height:1.5!important}
-  ::selection{background:transparent!important;color:inherit!important}
-  .line-inp::selection{background:transparent!important;color:inherit!important}
-  .line-inp:focus{outline:none!important;box-shadow:none!important}
   .sec-presets{display:none!important}
   #printTitle{display:block!important;color:#1a1e2a!important}
   #printKey{display:block!important}
   .overlay,.play-overlay{display:none!important}
+  /* ── プレビューから印刷するとき ── */
+  body.printing-preview .sidebar,
+  body.printing-preview header,
+  body.printing-preview .pwa-banner,
+  body.printing-preview .app,
+  body.printing-preview .bottom-bar { display:none!important }
+  body.printing-preview #previewOverlay { display:block!important;position:static!important;background:none!important;padding:0!important }
+  body.printing-preview .modal.wide { box-shadow:none!important;border:none!important;width:100%!important;max-height:none!important;overflow:visible!important;padding:0!important;border-radius:0!important }
+  body.printing-preview .prev-toolbar { display:none!important }
+  body.printing-preview .prev-wrap { border-radius:0!important;padding:0!important;background:#fff!important;color:#1a1e2a!important }
+  body.printing-preview .prev-wrap.theme-dark .prev-chord,
+  body.printing-preview .prev-wrap.theme-dark-warm .prev-chord { color:#1a6abf!important }
+  body.printing-preview .prev-wrap.theme-dark .prev-section,
+  body.printing-preview .prev-wrap.theme-dark-warm .prev-section { color:#5a7a00!important;border-bottom-color:#d0dfa0!important }
+  body.printing-preview .modal-ttl-preview { color:#1a1e2a!important;border-bottom-color:#1a6abf!important }
+  body.printing-preview .prev-wrap div[style*="print-btn-row"] { display:none!important }
+  body.printing-preview #prevPrintBtnRow { display:none!important }
 }
 #printTitle{display:none;font-size:1.4rem;font-weight:900;margin-bottom:4px;padding-bottom:8px;border-bottom:2px solid #1a6abf}
 #printKey{font-size:0.9rem;color:#1a6abf;font-family:'JetBrains Mono',monospace;margin-bottom:16px;display:none}
@@ -697,7 +711,10 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
       <div class="modal-ttl-preview" id="prevTitle"></div>
       <div id="prevContent"></div>
     </div>
-    <button class="modal-close" onclick="closePreview()">閉じる</button>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="modal-close" style="margin-top:0" onclick="printFromPreview()">🖨 印刷 / PDF</button>
+      <button class="modal-close" style="margin-top:0" onclick="closePreview()">閉じる</button>
+    </div>
   </div>
 </div>
 
@@ -1242,6 +1259,19 @@ function applyPreviewClasses(){
 }
 function setPreviewTheme(t){prevTheme=t;applyPreviewClasses();}
 function setPreviewSize(s){prevSize=s;applyPreviewClasses();}
+
+function printFromPreview(){
+  // previewOverlay を一時的に visible にして印刷
+  const overlay = document.getElementById('previewOverlay');
+  document.body.classList.add('printing-preview');
+  overlay.style.display = 'block';
+  window.print();
+  // 印刷ダイアログを閉じた後に元に戻す
+  setTimeout(()=>{
+    document.body.classList.remove('printing-preview');
+    overlay.style.display = '';
+  }, 500);
+}
 // ══ PDF / PRINT EXPORT ══
 function openPdfModal(){
   const song=currentSong();if(!song){toast('⚠ 曲を選択してください');return;}
@@ -1270,7 +1300,7 @@ function doPdfExport(){
     const pk=document.getElementById('printKey');
     pt.textContent=song.title||'（無題）';
     pk.textContent=song.key?`Key: ${song.key}`:'';
-    setTimeout(()=>{ if(document.activeElement) document.activeElement.blur(); window.print(); },80);
+    setTimeout(()=>{ window.print(); },80);
   } else {
     // Text export
     let txt=`${song.title||'（無題）'}`;
