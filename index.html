@@ -482,6 +482,9 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
   body.warm-set .type-section .line-inp{color:#b07800!important;border-bottom:1px solid #f0d080!important}
   body.warm-set .type-chord .line-inp{color:#b0306a!important}
   .line-inp{color:#1a1e2a!important;background:transparent!important;border:none!important;resize:none;pointer-events:none;height:auto!important;overflow:visible;padding:2px 7px!important;min-height:unset!important;line-height:1.5!important}
+  ::selection{background:transparent!important;color:inherit!important}
+  .line-inp::selection{background:transparent!important;color:inherit!important}
+  .line-inp:focus{outline:none!important;box-shadow:none!important}
   .sec-presets{display:none!important}
   #printTitle{display:block!important;color:#1a1e2a!important}
   #printKey{display:block!important}
@@ -1267,7 +1270,7 @@ function doPdfExport(){
     const pk=document.getElementById('printKey');
     pt.textContent=song.title||'（無題）';
     pk.textContent=song.key?`Key: ${song.key}`:'';
-    setTimeout(()=>{ window.print(); },80);
+    setTimeout(()=>{ if(document.activeElement) document.activeElement.blur(); window.print(); },80);
   } else {
     // Text export
     let txt=`${song.title||'（無題）'}`;
