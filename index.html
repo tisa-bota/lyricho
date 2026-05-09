@@ -185,8 +185,8 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
 .sec-presets.show{display:flex}
 .sec-chip{background:var(--hi-green);border:1px solid #2e2608;color:var(--green);font-size:0.71rem;font-weight:700;padding:4px 10px;border-radius:12px;cursor:pointer;font-family:inherit;letter-spacing:.05em;transition:all .15s}
 .sec-chip:hover,.sec-chip:active{background:#2e2608}
-.line-inp{flex:1;background:transparent;border:1px solid transparent;color:var(--text);font-family:inherit;font-size:calc(0.91rem * var(--ui-scale));padding:6px 7px;border-radius:5px;outline:none;resize:none;overflow:hidden;min-height:34px;line-height:1.6;transition:border .15s;touch-action:none}
-.type-chord .line-inp{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--blue);font-size:calc(0.94rem * var(--ui-scale))}
+.line-inp{flex:1;background:transparent;border:1px solid transparent;color:var(--text);font-family:inherit;font-size:calc(0.91rem * var(--ui-scale));padding:6px 7px;border-radius:5px;outline:none;resize:none;overflow:hidden;min-height:34px;line-height:1.6;transition:border .15s;touch-action:pan-y;user-select:text;-webkit-user-select:text}
+.type-chord .line-inp{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--blue);font-size:calc(0.94rem * var(--ui-scale));touch-action:none;user-select:text;-webkit-user-select:text}
 .line-inp:focus{border-color:var(--border)!important;background:var(--surface2)!important}
 .del-btn{color:var(--muted);background:none;border:none;cursor:pointer;font-size:1rem;padding:5px 3px;margin-top:3px;flex-shrink:0;transition:color .15s;opacity:0}
 .line-row:hover .del-btn{opacity:1}
@@ -574,7 +574,6 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
           <button class="hbtn" id="transposeBtn" onclick="openTranspose()" style="font-size:0.68rem;padding:4px 7px;color:var(--blue);border-color:#1a3355;display:none">移調</button>
         </div>
         <button class="hbtn blue" onclick="openPaste()">✎ 歌詞一括</button>
-        <button class="hbtn pdf"  onclick="openPdfModal()">⬇ 出力</button>
         <button class="hbtn"      onclick="openPreview()">▶ プレビュー</button>
         <div class="ui-size-btns" id="uiSizeBtns">
           <span class="ui-size-lbl">Ａ</span>
@@ -705,15 +704,15 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
         <button class="prev-tbtn size-btn active" id="prevSizeM" onclick="setPreviewSize('m')">中</button>
         <button class="prev-tbtn size-btn" id="prevSizeL" onclick="setPreviewSize('l')">大</button>
       </div>
+      <div style="margin-left:auto;display:flex;gap:6px;flex-shrink:0">
+        <button class="prev-tbtn" style="background:#1a2a1a;border-color:#2e5e2e;color:#6ee7c7;font-size:0.78rem;padding:5px 13px" onclick="openPdfModal()">⬇ 出力</button>
+        <button class="prev-tbtn" style="background:var(--surface2);border-color:var(--border);color:var(--muted);font-size:0.78rem;padding:5px 13px" onclick="closePreview()">✕ 閉じる</button>
+      </div>
     </div>
     <!-- content wrapper (theme + size applied here) -->
     <div class="prev-wrap theme-dark size-m" id="prevWrap">
       <div class="modal-ttl-preview" id="prevTitle"></div>
       <div id="prevContent"></div>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:16px">
-      <button class="modal-close" style="margin-top:0" onclick="printFromPreview()">🖨 印刷 / PDF</button>
-      <button class="modal-close" style="margin-top:0" onclick="closePreview()">閉じる</button>
     </div>
   </div>
 </div>
@@ -1253,9 +1252,7 @@ function applyPreviewClasses(){
   ['s','m','l'].forEach(s=>{
     document.getElementById('prevSize'+s.toUpperCase()).classList.toggle('active',prevSize===s);
   });
-  const mc=document.querySelector('#previewOverlay .modal-close');
-  const isLight = prevTheme==='light'||prevTheme==='light-warm';
-  if(mc){mc.style.background=isLight?'#eef1fa':'';mc.style.color=isLight?'#2a3050':'';}
+  // ライトテーマ時の閉じるボタン色は prev-toolbar 内ボタンに適用なし（CSS変数で対応）
 }
 function setPreviewTheme(t){prevTheme=t;applyPreviewClasses();}
 function setPreviewSize(s){prevSize=s;applyPreviewClasses();}
@@ -1818,13 +1815,13 @@ applyColorSet();
   let _ty = 0;
   linesArea.addEventListener('touchstart', e=>{
     const t = e.target;
-    if(t && t.classList && t.classList.contains('line-inp')){
+    if(t && t.classList && t.classList.contains('line-inp') && t.closest('.type-chord')){
       _ty = e.touches[0].clientY;
     }
   }, {passive:true});
   linesArea.addEventListener('touchmove', e=>{
     const t = e.target;
-    if(t && t.classList && t.classList.contains('line-inp')){
+    if(t && t.classList && t.classList.contains('line-inp') && t.closest('.type-chord')){
       const dy = _ty - e.touches[0].clientY;
       _ty = e.touches[0].clientY;
       linesArea.scrollTop += dy;
