@@ -608,7 +608,7 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
         <div class="chord-panel">
           <div class="chord-panel-header">
             <span class="chord-lbl" id="chordPanelLbl">① ルート音 → ② 種類を選んで挿入</span>
-            <button class="degree-toggle-btn" id="degreeToggleBtn" onclick="toggleChordMode()">♬ ディグリーに変換</button>
+            <button class="degree-toggle-btn" id="degreeToggleBtn" onmousedown="event.preventDefault()" onclick="toggleChordMode()">♬ ディグリーに変換</button>
           </div>
           <div class="chord-root-row" id="chordRootRow"></div>
           <div class="chord-qual-row" id="chordQualRow">
@@ -918,6 +918,7 @@ function buildChordGrid(){
       if(gi>0){const sp=document.createElement('div');sp.className='chord-sep';rr.appendChild(sp);}
       grp.forEach(ch=>{
         const b=document.createElement('button');b.className='chord-btn degree';b.textContent=ch;
+        b.onmousedown=e=>e.preventDefault();
         b.onclick=()=>insertChord(ch);rr.appendChild(b);
       });
     });
@@ -932,6 +933,7 @@ function buildChordGrid(){
   ROOTS.forEach(root=>{
     const b=document.createElement('button');
     b.className='chord-btn';b.textContent=root;
+    b.onmousedown=e=>e.preventDefault();
     b.onclick=()=>selectRoot(root,b);
     rr.appendChild(b);
   });
@@ -978,7 +980,7 @@ function insertSpecial(ch){
     const st=el.selectionStart,en=el.selectionEnd;
     line.text=line.text.slice(0,st)+ch+line.text.slice(en);
     saveSongs();renderLines();
-    setTimeout(()=>{const ne=document.getElementById('li-'+tid);if(ne){const p=st+ch.length;ne.inputMode='none';ne.setSelectionRange(p,p);ne.focus();}},10);
+    setTimeout(()=>{const ne=document.getElementById('li-'+tid);if(ne){const p=st+ch.length;ne.setSelectionRange(p,p);ne.focus();}},10);
   }
 }
 
@@ -995,11 +997,11 @@ function chordBackspace(){
     if(st===en&&st>0){
       line.text=line.text.slice(0,st-1)+line.text.slice(st);
       saveSongs();renderLines();
-      setTimeout(()=>{const ne=document.getElementById('li-'+tid);if(ne){const p=st-1;ne.inputMode='none';ne.setSelectionRange(p,p);ne.focus();}},10);
+      setTimeout(()=>{const ne=document.getElementById('li-'+tid);if(ne){const p=st-1;ne.setSelectionRange(p,p);ne.focus();}},10);
     } else if(st!==en){
       line.text=line.text.slice(0,st)+line.text.slice(en);
       saveSongs();renderLines();
-      setTimeout(()=>{const ne=document.getElementById('li-'+tid);if(ne){ne.inputMode='none';ne.setSelectionRange(st,st);ne.focus();}},10);
+      setTimeout(()=>{const ne=document.getElementById('li-'+tid);if(ne){ne.setSelectionRange(st,st);ne.focus();}},10);
     }
   }
 }
@@ -1015,7 +1017,7 @@ function insertChord(ch){
     const st=el.selectionStart,en=el.selectionEnd;
     line.text=line.text.slice(0,st)+ch+' '+line.text.slice(en);
     saveSongs();renderLines();
-    setTimeout(()=>{const ne=document.getElementById('li-'+tid);if(ne){const p=st+ch.length+1;ne.inputMode='none';ne.setSelectionRange(p,p);ne.focus();}},10);
+    setTimeout(()=>{const ne=document.getElementById('li-'+tid);if(ne){const p=st+ch.length+1;ne.setSelectionRange(p,p);ne.focus();}},10);
   } else {line.text+=ch+' ';saveSongs();renderLines();}
 }
 
@@ -1550,7 +1552,15 @@ function renderLines(){
       line.text=this.value;autoResize(this);saveSongs();
       if(line.type==='section'){const ch=document.getElementById('chips-'+line.id);if(ch)ch.classList.toggle('show',!this.value);}
     };
-    if(line.type==='chord'){inp.onfocus=()=>{focusedChordId=line.id;};inp.inputMode='none';}
+    if(line.type==='chord'){
+      inp.onfocus=()=>{
+        focusedChordId=line.id;
+        const bar=document.getElementById('bottomBar');
+        if(bar&&bar.classList.contains('panel-hidden')){
+          openLinePanel(line.id);
+        }
+      };
+    }
     const del=document.createElement('button');del.className='del-btn';del.textContent='✕';
     del.onclick=()=>{
       const _area=document.getElementById('linesArea');
