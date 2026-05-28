@@ -641,7 +641,7 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
 </div>
 
 <!-- PDF EXPORT MODAL -->
-<div class="overlay" id="pdfOverlay" onclick="if(event.target===this)closePdfModal()">
+<div class="overlay" id="pdfOverlay" style="z-index:210" onclick="if(event.target===this)closePdfModal()">
   <div class="pdf-modal">
     <h2>⬇ コード譜を出力</h2>
     <p class="pdf-note">出力する形式を選んでください。</p>
