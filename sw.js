@@ -1,4 +1,4 @@
-const VERSION    = '40678c79'; // GitHub Actions がここをコミットSHAに置換
+const VERSION    = 'be253fc0'; // GitHub Actions がここをコミットSHAに置換
 const CACHE_NAME = `lyricho-v${VERSION}`;
 
 const ASSETS = [
