@@ -103,12 +103,18 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
 .song-name{font-size:0.86rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .song-key-tag{font-size:0.68rem;color:var(--blue);font-family:'JetBrains Mono',monospace;font-weight:700}
 .item-del{color:var(--muted);padding:4px 7px;cursor:pointer;opacity:0;transition:all .15s;flex-shrink:0;font-size:0.9rem;line-height:1}
+.item-export{color:var(--muted);padding:4px 7px;cursor:pointer;opacity:0;transition:all .15s;flex-shrink:0;font-size:0.9rem;line-height:1}
 .song-item:hover .item-del,.set-item:hover .item-del{opacity:1}
+.song-item:hover .item-export{opacity:1}
 .item-del:hover{color:var(--red)}
-.panel-footer{padding:10px 12px;border-top:1px solid var(--border);flex-shrink:0}
+.item-export:hover{color:var(--blue)}
+.panel-footer{padding:10px 12px;border-top:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;gap:6px}
 .new-btn{width:100%;background:var(--red);color:#120a1e;border:none;padding:10px;border-radius:8px;font-family:inherit;font-weight:700;font-size:0.86rem;cursor:pointer;transition:opacity .2s}
 .new-btn:hover{opacity:.85}
 .new-btn.amber{background:var(--amber);color:#1a0e04}
+.io-btn-row{display:flex;gap:6px}
+.io-btn{flex:1;background:var(--bg);border:1px solid var(--border);color:var(--muted);padding:8px 6px;border-radius:8px;font-family:inherit;font-weight:700;font-size:0.72rem;cursor:pointer;transition:all .2s}
+.io-btn:hover{border-color:var(--blue);color:var(--blue)}
 .no-items{padding:20px;color:var(--muted);font-size:0.82rem;text-align:center}
 
 /* SETLIST SIDEBAR */
@@ -404,7 +410,7 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
   body.vedit .sidebar{transform:translateX(-100%)}
   body.vedit .editor-area{transform:translateX(0)}
   .panel-footer .new-btn{display:block}
-  .item-del,.del-btn,.set-row-del{opacity:1!important}
+  .item-del,.item-export,.del-btn,.set-row-del{opacity:1!important}
   .bottom-bar{padding-bottom:var(--safe-b)}
   .chord-btn{min-width:40px;padding:8px 9px;font-size:0.85rem}
   .song-item{padding:14px 14px}
@@ -443,7 +449,7 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
 
   /* タッチ操作しやすいサイズ調整 */
   .panel-footer .new-btn{display:block}
-  .item-del,.del-btn,.set-row-del{opacity:1!important}
+  .item-del,.item-export,.del-btn,.set-row-del{opacity:1!important}
   .bottom-bar{padding-bottom:var(--safe-b)}
   .chord-btn{min-width:46px;padding:10px 12px;font-size:0.9rem}
   .song-item{padding:14px 16px}
@@ -539,7 +545,14 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
         <button class="sort-btn" id="sortBtn" onclick="toggleSort()">あ↑</button>
       </div>
       <div class="item-list" id="songList"></div>
-      <div class="panel-footer"><button class="new-btn" onclick="newSong()">＋ 新しい曲を追加</button></div>
+      <div class="panel-footer">
+        <button class="new-btn" onclick="newSong()">＋ 新しい曲を追加</button>
+        <div class="io-btn-row">
+          <button class="io-btn" onclick="exportAllSongs()">⬇ 全曲書き出し</button>
+          <button class="io-btn" onclick="document.getElementById('songImportInput').click()">⬆ 取り込み</button>
+        </div>
+        <input type="file" id="songImportInput" accept=".json,application/json" multiple style="display:none" onchange="importSongFiles(event)">
+      </div>
     </div>
     <div class="panel hidden" id="panelSets">
       <div class="item-list" id="setList"></div>
@@ -766,6 +779,18 @@ header{background:var(--surface);border-bottom:2px solid var(--red);padding:11px
   </div>
 </div>
 
+<!-- CUSTOM PROMPT MODAL（ファイル名入力用） -->
+<div class="overlay" id="promptOverlay">
+  <div class="modal" style="width:min(100%,360px)">
+    <div class="modal-ttl" id="promptMsg" style="font-size:0.95rem;font-weight:700;border-bottom:none;margin-bottom:12px;padding-bottom:0;line-height:1.6"></div>
+    <input type="text" id="promptInput" class="search-box" style="width:100%;box-sizing:border-box;margin-bottom:16px" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+    <div style="display:flex;gap:8px">
+      <button class="modal-close" id="promptCancel" style="flex:1;margin-top:0">キャンセル</button>
+      <button class="modal-close" id="promptOk" style="flex:1;margin-top:0;background:var(--blue);color:#0a1e18;border-color:var(--blue)">書き出す</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST NOTIFICATION -->
 <div id="toastEl" style="display:none;position:fixed;bottom:calc(24px + var(--safe-b));left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 20px;border-radius:24px;font-size:0.84rem;font-weight:700;z-index:500;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.5);pointer-events:none"></div>
 
@@ -802,6 +827,35 @@ function customConfirm(msg, okLabel='削除する'){
     function onCancel(){ cleanup(false); }
     ok.addEventListener('click', onOk);
     cancel.addEventListener('click', onCancel);
+  });
+}
+function customPrompt(msg, defaultVal='', okLabel='OK'){
+  return new Promise(resolve=>{
+    const msgEl=document.getElementById('promptMsg');
+    const inputEl=document.getElementById('promptInput');
+    const ok=document.getElementById('promptOk');
+    const cancel=document.getElementById('promptCancel');
+    msgEl.textContent=msg;
+    inputEl.value=defaultVal;
+    ok.textContent=okLabel;
+    document.getElementById('promptOverlay').classList.add('open');
+    setTimeout(()=>{inputEl.focus();inputEl.select();},50);
+    function cleanup(result){
+      document.getElementById('promptOverlay').classList.remove('open');
+      ok.removeEventListener('click', onOk);
+      cancel.removeEventListener('click', onCancel);
+      inputEl.removeEventListener('keydown', onKey);
+      resolve(result);
+    }
+    function onOk()    { cleanup(inputEl.value); }
+    function onCancel(){ cleanup(null); }
+    function onKey(ev){
+      if(ev.key==='Enter'){ev.preventDefault();onOk();}
+      else if(ev.key==='Escape'){onCancel();}
+    }
+    ok.addEventListener('click', onOk);
+    cancel.addEventListener('click', onCancel);
+    inputEl.addEventListener('keydown', onKey);
   });
 }
 let _toastTimer = null;
@@ -1340,6 +1394,155 @@ function doPdfExport(){
   }
 }
 
+// ══ ローマ字変換（ファイル名用） ══
+// ひらがな・カタカナのみ変換対応。漢字・記号等は除去してASCII化する（iOS PWAの文字化け対策・既存方針に準拠）
+const ROMAJI_DIGRAPH = {
+  'きゃ':'kya','きゅ':'kyu','きょ':'kyo','しゃ':'sha','しゅ':'shu','しょ':'sho',
+  'ちゃ':'cha','ちゅ':'chu','ちょ':'cho','にゃ':'nya','にゅ':'nyu','にょ':'nyo',
+  'ひゃ':'hya','ひゅ':'hyu','ひょ':'hyo','みゃ':'mya','みゅ':'myu','みょ':'myo',
+  'りゃ':'rya','りゅ':'ryu','りょ':'ryo','ぎゃ':'gya','ぎゅ':'gyu','ぎょ':'gyo',
+  'じゃ':'ja','じゅ':'ju','じょ':'jo','びゃ':'bya','びゅ':'byu','びょ':'byo',
+  'ぴゃ':'pya','ぴゅ':'pyu','ぴょ':'pyo',
+  'キャ':'kya','キュ':'kyu','キョ':'kyo','シャ':'sha','シュ':'shu','ショ':'sho',
+  'チャ':'cha','チュ':'chu','チョ':'cho','ニャ':'nya','ニュ':'nyu','ニョ':'nyo',
+  'ヒャ':'hya','ヒュ':'hyu','ヒョ':'hyo','ミャ':'mya','ミュ':'myu','ミョ':'myo',
+  'リャ':'rya','リュ':'ryu','リョ':'ryo','ギャ':'gya','ギュ':'gyu','ギョ':'gyo',
+  'ジャ':'ja','ジュ':'ju','ジョ':'jo','ビャ':'bya','ビュ':'byu','ビョ':'byo',
+  'ピャ':'pya','ピュ':'pyu','ピョ':'pyo',
+  // 外来語表記（ティ／ファ 等）
+  'ティ':'ti','ディ':'di','デュ':'dyu','テュ':'tyu','トゥ':'tu','ドゥ':'du',
+  'チェ':'che','シェ':'she','ジェ':'je','ツァ':'tsa','ツィ':'tsi','ツェ':'tse','ツォ':'tso',
+  'ファ':'fa','フィ':'fi','フェ':'fe','フォ':'fo','フュ':'fyu',
+  'ウィ':'wi','ウェ':'we','ウォ':'wo',
+  'ヴァ':'va','ヴィ':'vi','ヴェ':'ve','ヴォ':'vo','ヴュ':'vyu',
+  'クァ':'kwa','クィ':'kwi','クェ':'kwe','クォ':'kwo','グァ':'gwa',
+  'イェ':'ye'
+};
+const ROMAJI_SINGLE = {
+  'あ':'a','い':'i','う':'u','え':'e','お':'o','か':'ka','き':'ki','く':'ku','け':'ke','こ':'ko',
+  'さ':'sa','し':'shi','す':'su','せ':'se','そ':'so','た':'ta','ち':'chi','つ':'tsu','て':'te','と':'to',
+  'な':'na','に':'ni','ぬ':'nu','ね':'ne','の':'no','は':'ha','ひ':'hi','ふ':'fu','へ':'he','ほ':'ho',
+  'ま':'ma','み':'mi','む':'mu','め':'me','も':'mo','や':'ya','ゆ':'yu','よ':'yo',
+  'ら':'ra','り':'ri','る':'ru','れ':'re','ろ':'ro','わ':'wa','を':'o','ん':'n',
+  'が':'ga','ぎ':'gi','ぐ':'gu','げ':'ge','ご':'go','ざ':'za','じ':'ji','ず':'zu','ぜ':'ze','ぞ':'zo',
+  'だ':'da','ぢ':'ji','づ':'zu','で':'de','ど':'do','ば':'ba','び':'bi','ぶ':'bu','べ':'be','ぼ':'bo',
+  'ぱ':'pa','ぴ':'pi','ぷ':'pu','ぺ':'pe','ぽ':'po',
+  'ぁ':'a','ぃ':'i','ぅ':'u','ぇ':'e','ぉ':'o',
+  'ア':'a','イ':'i','ウ':'u','エ':'e','オ':'o','カ':'ka','キ':'ki','ク':'ku','ケ':'ke','コ':'ko',
+  'サ':'sa','シ':'shi','ス':'su','セ':'se','ソ':'so','タ':'ta','チ':'chi','ツ':'tsu','テ':'te','ト':'to',
+  'ナ':'na','ニ':'ni','ヌ':'nu','ネ':'ne','ノ':'no','ハ':'ha','ヒ':'hi','フ':'fu','ヘ':'he','ホ':'ho',
+  'マ':'ma','ミ':'mi','ム':'mu','メ':'me','モ':'mo','ヤ':'ya','ユ':'yu','ヨ':'yo',
+  'ラ':'ra','リ':'ri','ル':'ru','レ':'re','ロ':'ro','ワ':'wa','ヲ':'o','ン':'n',
+  'ガ':'ga','ギ':'gi','グ':'gu','ゲ':'ge','ゴ':'go','ザ':'za','ジ':'ji','ズ':'zu','ゼ':'ze','ゾ':'zo',
+  'ダ':'da','ヂ':'ji','ヅ':'zu','デ':'de','ド':'do','バ':'ba','ビ':'bi','ブ':'bu','ベ':'be','ボ':'bo',
+  'パ':'pa','ピ':'pi','プ':'pu','ペ':'pe','ポ':'po',
+  'ァ':'a','ィ':'i','ゥ':'u','ェ':'e','ォ':'o','ッ':'','ー':'','ヴ':'vu'
+};
+function nextMoraRomaji(str,i){
+  const two=str.slice(i,i+2);
+  if(ROMAJI_DIGRAPH[two]!==undefined)return{romaji:ROMAJI_DIGRAPH[two],len:2};
+  const one=str[i];
+  if(ROMAJI_SINGLE[one]!==undefined)return{romaji:ROMAJI_SINGLE[one],len:1};
+  return null;
+}
+function toRomaji(str){
+  str=(str||'');
+  let i=0,out='';
+  while(i<str.length){
+    const ch=str[i];
+    if(ch==='っ'||ch==='ッ'){
+      const nxt=nextMoraRomaji(str,i+1);
+      if(nxt&&nxt.romaji){out+=nxt.romaji[0]+nxt.romaji;i+=1+nxt.len;continue;}
+      i++;continue;
+    }
+    if(ch==='ー'){i++;continue;}
+    const nxt=nextMoraRomaji(str,i);
+    if(nxt){out+=nxt.romaji;i+=nxt.len;continue;}
+    out+=ch;i++;
+  }
+  return out;
+}
+// タイトル→ファイル名断片（ASCII英数字のみ、変換不可な文字＝主に漢字は除去）
+function titleToFilenameBase(title,fallbackId){
+  let out=toRomaji(title||'');
+  out=out.normalize('NFKC').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_+|_+$/g,'').replace(/_+/g,'_').toLowerCase();
+  if(!out)out='song_'+String(fallbackId).slice(0,8);
+  return out;
+}
+// タイトルに漢字が含まれるか（含まれる場合は自動ローマ字化できないためファイル名をユーザーに確認する）
+function hasKanji(str){return /[\u4E00-\u9FFF\u3400-\u4DBF]/.test(str||'');}
+function todayStamp(){
+  const d=new Date();
+  const p=n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}`;
+}
+function downloadJSON(obj,filename){
+  const blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=filename;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+// ══ 曲の書き出し・取り込み ══
+async function exportSong(id,e){
+  if(e)e.stopPropagation();
+  const s=songs.find(s=>s.id===id);if(!s)return;
+  let base=titleToFilenameBase(s.title,s.id);
+  if(hasKanji(s.title)){
+    const input=await customPrompt('タイトルに漢字が含まれるため自動変換できません。ファイル名（英数字）を確認・入力してください',base,'書き出す');
+    if(input===null)return; // キャンセル
+    const cleaned=input.normalize('NFKC').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_+|_+$/g,'').replace(/_+/g,'_').toLowerCase();
+    base=cleaned||('song_'+String(s.id).slice(0,8));
+  }
+  downloadJSON({lyrichoExport:'song',version:1,song:s},`lyricho_song_${base}.json`);
+  toast('書き出しました');
+}
+function exportAllSongs(){
+  if(!songs.length){toast('曲がありません');return;}
+  downloadJSON({lyrichoExport:'songs',version:1,songs:songs},`lyricho_songs_${todayStamp()}.json`);
+  toast('全曲を書き出しました');
+}
+async function importSongFiles(e){
+  const files=Array.from(e.target.files||[]);
+  e.target.value='';
+  if(!files.length)return;
+  let importedSongs=[];
+  for(const file of files){
+    try{
+      const text=await file.text();
+      const data=JSON.parse(text);
+      if(data&&data.lyrichoExport==='song'&&data.song){
+        importedSongs.push(data.song);
+      }else if(data&&data.lyrichoExport==='songs'&&Array.isArray(data.songs)){
+        importedSongs=importedSongs.concat(data.songs);
+      }else if(data&&data.id&&Array.isArray(data.lines)){
+        // 単一曲データが直接渡された場合（保険的対応）
+        importedSongs.push(data);
+      }else{
+        toast(`${file.name} は曲データとして読み込めません`);
+      }
+    }catch(err){
+      toast(`${file.name} の読み込みに失敗しました`);
+    }
+  }
+  if(!importedSongs.length)return;
+  let addedCount=0,replacedCount=0;
+  for(const imp of importedSongs){
+    if(!imp||!imp.id||!Array.isArray(imp.lines))continue;
+    const existingIdx=songs.findIndex(s=>s.id===imp.id);
+    if(existingIdx>=0){
+      const ok=await customConfirm(`「${imp.title||'（無題）'}」は既存の曲と重複しています。上書きしますか？`,'上書きする');
+      if(ok){songs[existingIdx]=imp;replacedCount++;}
+    }else{
+      songs.push(imp);addedCount++;
+    }
+  }
+  saveSongs();renderSongList();
+  toast(`取り込み完了：追加${addedCount}件・上書き${replacedCount}件`);
+}
+
 // ══ SONG MANAGEMENT ══
 function newSong(){
   const s={id:uid(),title:'',key:'',lines:[]};songs.push(s);saveSongs();
@@ -1380,6 +1583,7 @@ function renderSongList(){
         <div class="song-name">${esc(s.title)||'（無題）'}</div>
         ${s.key?`<div class="song-key-tag">Key: ${esc(s.key)}</div>`:''}
       </div>
+      <span class="item-export" onclick="exportSong('${s.id}',event)" title="この曲を書き出し">⬇</span>
       <span class="item-del" onclick="deleteSong('${s.id}',event)">✕</span>
     </div>`).join('');
 }
